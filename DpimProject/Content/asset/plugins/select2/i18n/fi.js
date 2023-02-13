@@ -1,0 +1,3 @@
+﻿/*! Select2 4.0.0 | https://github.com/select2/select2/blob/master/LICENSE.md */
+
+(function(){if(jQuery&&jQuery.fn&&jQuery.fn.select2&&jQuery.fn.select2.amd)var e=jQuery.fn.select2.amd;return e.define("select2/i18n/fi",[],function(){return{inputTooLong:function(e){var t=e.input.length-e.maximum;return"Ole hyvรค ja anna "+t+" merkkiรค vรคhemmรคn"},inputTooShort:function(e){var t=e.minimum-e.input.length;return"Ole hyvรค ja anna "+t+" merkkiรค lisรครค"},loadingMore:function(){return"Ladataan lisรครค tuloksiaโ€ฆ"},maximumSelected:function(e){return"Voit valita ainoastaan "+e.maximum+" kpl"},noResults:function(){return"Ei tuloksia"},searching:function(){}}}),{define:e.define,require:e.require}})();

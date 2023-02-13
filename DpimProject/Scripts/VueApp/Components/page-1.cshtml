@@ -1,0 +1,834 @@
+﻿
+@{
+    var auth = (ShopingOnline.Models.Authentication.Authorize)ViewBag.Auth;
+    var authData = new
+    {
+        auth.userid,
+        auth.session_id,
+        auth.is_admin,
+        auth.is_authenticated
+    };
+    var getUrl = HttpContext.Current.Request.Url.LocalPath;
+
+    dynamic menu = null;
+    dynamic menu2 = null;
+    dynamic master = null;
+    using (var db = new ShopingOnline.m.Data.DataContext())
+    {
+        var default_menuright = db.menu_right.ToList();
+        var default_menuitem = db.menu_item.ToList();
+        var menu_h = (from a in db.menu_item
+
+                      join b1 in db.menu_objects on new { a.menu_name } equals new { b1.menu_name } into b2
+                      from b in b2.DefaultIfEmpty()
+
+                      where !new string[] { "Master", "REWEB", "REPM" }.Contains(b.module) && a.menulevel == 0
+
+                      where (!(a.menu_id.CompareTo("20000") >= 0 && a.menu_id.CompareTo("29999") <= 0) && !(a.menu_id.CompareTo("40000") >= 0 && a.menu_id.CompareTo("49999") <= 0) && !(a.menu_id.CompareTo("50000") >= 0 && a.menu_id.CompareTo("59999") <= 0))
+
+                      select new
+                      {
+                          a,
+                          b
+                      }).ToList();
+
+        menu2 = menu_h.Select(x =>
+        {
+            var module = x.b?.module ?? "";
+            var menu_name = x.a?.menu_name ?? "";
+            var menu_id = x.a?.menu_id ?? "";
+            var menu_right = default_menuright.Where(w => w.maincode == auth.maincode && w.empno == auth.empno && w.module == module).ToList();
+            var menu_item = default_menuitem.Where(w => w.menu_name == menu_name && w.menulevel != 0 && !new string[] { "-", "--", "---" }.Contains(w.menu_text.Trim())).ToList();
+            var submenu = menu_item.Where(w => w.menu_id.Substring(0,1) == menu_id.Substring(0,1) && (w.menu_id.Substring(0,3) + "00") == w.menu_id).Select(s1 =>
+            {
+                var menu_item_sub = menu_item.Where(w => (w.menu_id.Substring(0,3)) == s1.menu_id.Substring(0,3) && w.menu_id.Substring(3, 2) != "00");
+                return new
+                {
+                    menu_id = s1.menu_id ?? "",
+                    lang = s1.lang1 ?? s1.lang2,
+                    isenabled = menu_item_sub.Count() > 0 ? true : menu_right.Any(w => w.menu_id == (s1.menu_id ?? "") && w.isenabled == 1),
+                    view_file = menu_item_sub.Count() > 0 ? true : System.IO.File.Exists(Configuration.MapPath($"~/Views2/{x.b?.module}/{s1.webview}.cshtml")),
+                    webview = $"WebView/Module/{x.b?.module},{s1.webview}",
+
+                    submenu = menu_item_sub.Select(s2 => new
+                    {
+                        s2.menu_id,
+                        lang = s2.lang1 ?? s2.lang2,
+                        isenabled = menu_right.Any(w => w.menu_id == s2.menu_id && w.isenabled == 1),
+                        view_file = System.IO.File.Exists(Configuration.MapPath($"~/Views2/{x.b.module}/{s2.webview}.cshtml")),
+                        webview = $"WebView/Module/{x.b?.module},{s2.webview}",
+                    }).ToList()
+                };
+            }).ToList();
+
+            return new
+            {
+                x.a.menu_name,
+                x.a.menu_id,
+                lang = x.a.lang1 ?? x.a.lang2,
+                x.b?.module,
+                isenabled = menu_right.Any(w => w.menu_id == x.a.menu_id && w.isenabled == 1),
+                view_file = System.IO.File.Exists(Configuration.MapPath($"~/Views2/{x.b?.module}/{x.a.webview}.cshtml")),
+                webview = $"WebView/Module/{x.b?.module},{x.a.webview}",
+
+                submenu
+            };
+        }).OrderBy(o => o.menu_id).ToList();
+    }
+}
+<script type="text/x-template" id="vue-component-page-1">
+    <div>
+        <div id="wrapper">
+            <!-- Navbar -->
+            <nav class="navbar-default navbar-static-side" role="navigation">
+                <div class="sidebar-collapse hidnev" style="display:none;">
+                    <ul class="nav metismenu" id="side-menu">
+                        <li class="nav-header" style="padding: 22px 25px">
+                            <div class="dropdown profile-element pointer" v-on:click="backTo()">
+                                <img src="@Url.Content("~/Content/img/mango_icon.png")" alt="ERP" />
+                                <span class="text-white" style="font-size:20px">Mango ERP</span>
+                            </div>
+                        </li>
+                        @{
+                            var controllerName = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString().ToUpper();
+                            if (controllerName == "HOME")
+                            {
+                                Html.RenderPartial("~/Views2/Menu/_HomeMenu.cshtml");
+                            }
+                            else if (ViewBag.WebModule == "QCC")
+                            {
+                                Html.RenderPartial("~/Views2/Menu/_QCC_Menu.cshtml");
+                            }
+                            else
+                            {
+                                Html.RenderPartial("~/Views2/Menu/_Menu.cshtml");
+                            }
+                        }
+                    </ul>
+                </div>
+            </nav>
+
+            <div id="page-wrapper" class="img-bg">
+                <!-- Header Title -->
+                <div class="row border-bottom">
+                    <nav class="navbar navbar-fixed-top" role="navigation">
+                        <div class="navbar-header">
+                            <a class="navbar-minimalize minimalize-styl-2" href="#">
+                                <i class="ti-menu" style="color:white;font-size:16px"></i>
+                            </a>
+                            <h4 class="minimalize-styl-2 d-none d-sm-block">
+                                <slot name="title"></slot>
+                            </h4>
+                        </div>
+                        <ul class="nav navbar-top-links navbar-right">
+                            <li class="dropdown d-none d-sm-block">
+                                <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
+                                    <i class="flag-icon nav-language-circle" v-bind:class="{'flag-icon-us' : uiLangActive == 'EN_MASTER','flag-icon-th' : uiLangActive == 'TH'}"></i>&nbsp;{{uiLangActive == 'EN_MASTER' ? 'EN' : uiLangActive == 'TH' ? 'TH' : uiLangActive}}
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="#" v-on:click.prevent="selectUiLang(x)" class="text-nowrap nowrap" v-for="x in uiLangList">
+                                            <i class="flag-icon" v-bind:class="{'flag-icon-us' : x == 'EN_MASTER','flag-icon-th' : x == 'TH'}"></i>&nbsp;{{x == 'EN_MASTER' ? 'EN' : x}} <i v-bind:class="{'fas fa-check': x === uiLangActive}"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                    <span class="fa-stack fa-sm">
+                                        <i class="fa fa-circle-thin fa-stack-2x"></i>
+                                        <i class="fa fa-user fa-stack-1x"></i>
+                                    </span>
+                                    {{(auth.empname||'').toUpperCase()}}
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#" class="text-nowrap nowrap" nowrap v-on:click.prevent="changePassword()"><i class="ti-key"></i> {{ui.change_password || "Change Password"}}</a></li>
+                                    <li><a href="#" class="text-nowrap nowrap" nowrap v-on:click.prevent="logoutClick()"><i class="ti-unlock"></i> {{ui.log_out || "Log Out"}}</a></li>
+                                    <li><div class="dropdown-divider"></div></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a class="right-sidebar-toggle">
+                                    <i class="fa fa-tasks"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <!-- Content -->
+                <div class="wrapper wrapper-content" id="app">
+                    <div class="row d-xl-none d-lg-none d-md-none  d-sm-none">
+                        <div class="col-md-12">
+                            <!-- Title Small -->
+                            <slot name="title-sm"></slot>
+                            <p></p>
+                        </div>
+                    </div>
+                    <!-- Body -->
+                    <slot name="body"></slot>
+                </div>
+                <!-- Footer -->
+                <slot name="footer"></slot>
+                <!-- Right Sidebar Panel -->
+                <div class="md-skin" id="right-sidebar">
+                    <div class="sidebar-container">
+                        <ul class="nav nav-tabs navs-3">
+                            <li>
+                                <a class="nav-link active" data-toggle="tab" href="#tab-1"> Notes </a>
+                            </li>
+                            <li>
+                                <a class="nav-link" data-toggle="tab" href="#tab-2"> Projects </a>
+                            </li>
+                            <li>
+                                <a class="nav-link" data-toggle="tab" href="#tab-3"> <i class="fa fa-gear"></i> </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id="tab-1" class="tab-pane active">
+                                <div class="sidebar-title">
+                                    <h3> <i class="fa fa-comments-o"></i> Latest Notes</h3>
+                                    <small><i class="fa fa-tim"></i> You have 10 new message.</small>
+                                </div>
+                                <div>
+                                    <div class="sidebar-message">
+                                        <a href="#">
+                                            <div class="float-left text-center">
+                                                <img alt="image" class="rounded-circle message-avatar" src="img/a1.jpg">
+
+                                                <div class="m-t-xs">
+                                                    <i class="fa fa-star text-warning"></i>
+                                                    <i class="fa fa-star text-warning"></i>
+                                                </div>
+                                            </div>
+                                            <div class="media-body">
+
+                                                There are many variations of passages of Lorem Ipsum available.
+                                                <br>
+                                                <small class="text-muted">Today 4:21 pm</small>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="sidebar-message">
+                                        <a href="#">
+                                            <div class="float-left text-center">
+                                                <img alt="image" class="rounded-circle message-avatar" src="img/a2.jpg">
+                                            </div>
+                                            <div class="media-body">
+                                                The point of using Lorem Ipsum is that it has a more-or-less normal.
+                                                <br>
+                                                <small class="text-muted">Yesterday 2:45 pm</small>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="sidebar-message">
+                                        <a href="#">
+                                            <div class="float-left text-center">
+                                                <img alt="image" class="rounded-circle message-avatar" src="img/a3.jpg">
+
+                                                <div class="m-t-xs">
+                                                    <i class="fa fa-star text-warning"></i>
+                                                    <i class="fa fa-star text-warning"></i>
+                                                    <i class="fa fa-star text-warning"></i>
+                                                </div>
+                                            </div>
+                                            <div class="media-body">
+                                                Mevolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+                                                <br>
+                                                <small class="text-muted">Yesterday 1:10 pm</small>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="sidebar-message">
+                                        <a href="#">
+                                            <div class="float-left text-center">
+                                                <img alt="image" class="rounded-circle message-avatar" src="img/a4.jpg">
+                                            </div>
+
+                                            <div class="media-body">
+                                                Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the
+                                                <br>
+                                                <small class="text-muted">Monday 8:37 pm</small>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="sidebar-message">
+                                        <a href="#">
+                                            <div class="float-left text-center">
+                                                <img alt="image" class="rounded-circle message-avatar" src="img/a8.jpg">
+                                            </div>
+                                            <div class="media-body">
+
+                                                All the Lorem Ipsum generators on the Internet tend to repeat.
+                                                <br>
+                                                <small class="text-muted">Today 4:21 pm</small>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="sidebar-message">
+                                        <a href="#">
+                                            <div class="float-left text-center">
+                                                <img alt="image" class="rounded-circle message-avatar" src="img/a7.jpg">
+                                            </div>
+                                            <div class="media-body">
+                                                Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.
+                                                <br>
+                                                <small class="text-muted">Yesterday 2:45 pm</small>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="sidebar-message">
+                                        <a href="#">
+                                            <div class="float-left text-center">
+                                                <img alt="image" class="rounded-circle message-avatar" src="img/a3.jpg">
+
+                                                <div class="m-t-xs">
+                                                    <i class="fa fa-star text-warning"></i>
+                                                    <i class="fa fa-star text-warning"></i>
+                                                    <i class="fa fa-star text-warning"></i>
+                                                </div>
+                                            </div>
+                                            <div class="media-body">
+                                                The standard chunk of Lorem Ipsum used since the 1500s is reproduced below.
+                                                <br>
+                                                <small class="text-muted">Yesterday 1:10 pm</small>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="sidebar-message">
+                                        <a href="#">
+                                            <div class="float-left text-center">
+                                                <img alt="image" class="rounded-circle message-avatar" src="img/a4.jpg">
+                                            </div>
+                                            <div class="media-body">
+                                                Uncover many web sites still in their infancy. Various versions have.
+                                                <br>
+                                                <small class="text-muted">Monday 8:37 pm</small>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="tab-2" class="tab-pane">
+                                <div class="sidebar-title">
+                                    <h3> <i class="fa fa-cube"></i> Latest projects</h3>
+                                    <small><i class="fa fa-tim"></i> You have 14 projects. 10 not completed.</small>
+                                </div>
+                                <ul class="sidebar-list">
+                                    <li>
+                                        <a href="#">
+                                            <div class="small float-right m-t-xs">9 hours ago</div>
+                                            <h4>Business valuation</h4>
+                                            It is a long established fact that a reader will be distracted.
+
+                                            <div class="small">Completion with: 22%</div>
+                                            <div class="progress progress-mini">
+                                                <div style="width: 22%;" class="progress-bar progress-bar-warning"></div>
+                                            </div>
+                                            <div class="small text-muted m-t-xs">Project end: 4:00 pm - 12.06.2014</div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <div class="small float-right m-t-xs">9 hours ago</div>
+                                            <h4>Contract with Company </h4>
+                                            Many desktop publishing packages and web page editors.
+
+                                            <div class="small">Completion with: 48%</div>
+                                            <div class="progress progress-mini">
+                                                <div style="width: 48%;" class="progress-bar"></div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <div class="small float-right m-t-xs">9 hours ago</div>
+                                            <h4>Meeting</h4>
+                                            By the readable content of a page when looking at its layout.
+
+                                            <div class="small">Completion with: 14%</div>
+                                            <div class="progress progress-mini">
+                                                <div style="width: 14%;" class="progress-bar progress-bar-info"></div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <span class="label label-primary float-right">NEW</span>
+                                            <h4>The generated</h4>
+                                            <!--<div class="small float-right m-t-xs">9 hours ago</div>-->
+                                            There are many variations of passages of Lorem Ipsum available.
+                                            <div class="small">Completion with: 22%</div>
+                                            <div class="small text-muted m-t-xs">Project end: 4:00 pm - 12.06.2014</div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <div class="small float-right m-t-xs">9 hours ago</div>
+                                            <h4>Business valuation</h4>
+                                            It is a long established fact that a reader will be distracted.
+
+                                            <div class="small">Completion with: 22%</div>
+                                            <div class="progress progress-mini">
+                                                <div style="width: 22%;" class="progress-bar progress-bar-warning"></div>
+                                            </div>
+                                            <div class="small text-muted m-t-xs">Project end: 4:00 pm - 12.06.2014</div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <div class="small float-right m-t-xs">9 hours ago</div>
+                                            <h4>Contract with Company </h4>
+                                            Many desktop publishing packages and web page editors.
+
+                                            <div class="small">Completion with: 48%</div>
+                                            <div class="progress progress-mini">
+                                                <div style="width: 48%;" class="progress-bar"></div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <div class="small float-right m-t-xs">9 hours ago</div>
+                                            <h4>Meeting</h4>
+                                            By the readable content of a page when looking at its layout.
+
+                                            <div class="small">Completion with: 14%</div>
+                                            <div class="progress progress-mini">
+                                                <div style="width: 14%;" class="progress-bar progress-bar-info"></div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <span class="label label-primary float-right">NEW</span>
+                                            <h4>The generated</h4>
+                                            <!--<div class="small float-right m-t-xs">9 hours ago</div>-->
+                                            There are many variations of passages of Lorem Ipsum available.
+                                            <div class="small">Completion with: 22%</div>
+                                            <div class="small text-muted m-t-xs">Project end: 4:00 pm - 12.06.2014</div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div id="tab-3" class="tab-pane">
+                                <div class="sidebar-title">
+                                    <h3><i class="fa fa-gears"></i> Settings</h3>
+                                    <small><i class="fa fa-tim"></i> You have 14 projects. 10 not completed.</small>
+                                </div>
+                                <div class="setings-item">
+                                    <span>
+                                        Show notifications
+                                    </span>
+                                    <div class="switch">
+                                        <div class="onoffswitch">
+                                            <input type="checkbox" name="collapsemenu" class="onoffswitch-checkbox" id="example">
+                                            <label class="onoffswitch-label" for="example">
+                                                <span class="onoffswitch-inner"></span>
+                                                <span class="onoffswitch-switch"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="setings-item">
+                                    <span>
+                                        Disable Chat
+                                    </span>
+                                    <div class="switch">
+                                        <div class="onoffswitch">
+                                            <input type="checkbox" name="collapsemenu" checked class="onoffswitch-checkbox" id="example2">
+                                            <label class="onoffswitch-label" for="example2">
+                                                <span class="onoffswitch-inner"></span>
+                                                <span class="onoffswitch-switch"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="setings-item">
+                                    <span>
+                                        Enable history
+                                    </span>
+                                    <div class="switch">
+                                        <div class="onoffswitch">
+                                            <input type="checkbox" name="collapsemenu" class="onoffswitch-checkbox" id="example3">
+                                            <label class="onoffswitch-label" for="example3">
+                                                <span class="onoffswitch-inner"></span>
+                                                <span class="onoffswitch-switch"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="setings-item">
+                                    <span>
+                                        Show charts
+                                    </span>
+                                    <div class="switch">
+                                        <div class="onoffswitch">
+                                            <input type="checkbox" name="collapsemenu" class="onoffswitch-checkbox" id="example4">
+                                            <label class="onoffswitch-label" for="example4">
+                                                <span class="onoffswitch-inner"></span>
+                                                <span class="onoffswitch-switch"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="setings-item">
+                                    <span>
+                                        Offline users
+                                    </span>
+                                    <div class="switch">
+                                        <div class="onoffswitch">
+                                            <input type="checkbox" checked name="collapsemenu" class="onoffswitch-checkbox" id="example5">
+                                            <label class="onoffswitch-label" for="example5">
+                                                <span class="onoffswitch-inner"></span>
+                                                <span class="onoffswitch-switch"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="setings-item">
+                                    <span>
+                                        Global search
+                                    </span>
+                                    <div class="switch">
+                                        <div class="onoffswitch">
+                                            <input type="checkbox" checked name="collapsemenu" class="onoffswitch-checkbox" id="example6">
+                                            <label class="onoffswitch-label" for="example6">
+                                                <span class="onoffswitch-inner"></span>
+                                                <span class="onoffswitch-switch"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="setings-item">
+                                    <span>
+                                        Update everyday
+                                    </span>
+                                    <div class="switch">
+                                        <div class="onoffswitch">
+                                            <input type="checkbox" name="collapsemenu" class="onoffswitch-checkbox" id="example7">
+                                            <label class="onoffswitch-label" for="example7">
+                                                <span class="onoffswitch-inner"></span>
+                                                <span class="onoffswitch-switch"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="sidebar-content">
+                                    <h4>Settings</h4>
+                                    <div class="small">
+                                        I belive that. Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+                                        And typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.
+                                        Over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal : Master Selected -->
+        <div class="modal fade" id="fsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title"><i class="fas fa-list"></i> Master</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <template v-for="(x,idx) in master">
+                                <template v-for="(z,idx1) in x.detail">
+                                    <div class="col-12 col-sm-3">
+                                        <div class="list-group">
+                                            <span class="list-group-item list-group-item-action">
+                                                <a v-bind:href="baseUrl + 'WebView/Module/' + z.webmodule + ',' + z.webview " target="_blank" v-bind:class="{'not-event': z.submenu.length > 0}"><i class="fa" v-bind:class="{'fa-circle': z.submenu.length > 0,'fa-circle-o': z.submenu.length == 0}"></i>&nbsp;{{uiLangActive != "TH" ? z.lang1 : z.lang2}}</a>
+                                                <i v-if="z.submenu.length > 0" class="fa fa-plus pull-right" style="margin-top: 5px;cursor:pointer" data-toggle="collapse" v-bind:data-target="'.multi-collapse'+idx1"></i>
+                                            </span>
+                                        </div>
+                                        <template v-for="(y,idx2) in z.submenu">
+                                            <div class="list-group collapse" v-bind:class="'multi-collapse'+idx1">
+                                                <span class="list-group-item list-group-item-action">
+                                                    <a v-bind:href="baseUrl + 'WebView/Module/' + y.webmodule + ',' + y.webview " target="_blank" style="padding-left:30px"><i class="fa fa-circle-o"></i> {{uiLangActive != "TH" ? y.lang1 : y.lang2}}</a>
+                                                </span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</script>
+<script>
+    let all_menu = @(Html.Raw(Dtl.json_stringify(menu)));
+    let menu2 = @(Html.Raw(Dtl.json_stringify(menu2)));
+    let master = @(Html.Raw(Dtl.json_stringify(master)));
+    Vue.component('page-1', {
+        template: '#vue-component-page-1',
+        data() {
+            return {
+                ui: uiLang,
+                uiLangList,
+                uiLangActive,
+                baseUrl,
+                n_count: 0,
+                m_count: 0,
+                auth: @Html.Raw(authData.ToJsonString()),
+                userOnline: {
+                    current: 0,
+                    max:0
+                },
+                programmeData: {
+                    version:`@(MangoWebPool.Program.Licence.BuildVersion)`
+                },
+                setUrl: String(window.location.pathname),
+                dataMenu: [],
+                dataMenuMain: [],
+                setModule: "",
+                setModule2: "",
+                getModule: "",
+                indexModule: "",
+                showTabBar: false,
+                master: [],
+            }
+        },
+        methods: {
+            changePassword() {
+                $.confirm({
+                    title: "<i class='fas fa-key'></i> Change Password",
+                    content: `<p>หากทำการเปลี่ยน Password ระบบจะ Logout ให้ทันที</p>
+                                   <span>Old Password</span><br>
+                                   <input type="password" class="form-control input-sm" id="oldPass" />
+                                   <span>New Password</span><br>
+                                   <input type="password" class="form-control input-sm" id="newPass" />
+                                   <span>Confirm Password</span><br>
+                                   <input type="password" class="form-control input-sm" id="conPass" />`,
+                    theme: 'material',
+                    animation: 'opacity',
+                    closeAnimation: 'opacity',
+                    animateFromElement: false,
+                    buttons: {
+                        Change: {
+                            text: 'Change Password',
+                            btnClass: 'btn-success',
+                            action: () => {
+                                let formData = { old_pass: oldPass.value, new_pass: newPass.value, con_pass: conPass.value }
+                                $dtl.post(formData, `WebView/Invoke/Setup.SE,change_password,,/`, d => {
+                                    if (d.success) {
+                                        $alert('', "เปลี่ยนรหัสผ่านเสร็จสิ้น", 'success');
+                                        window.location = baseUrl + 'AuthenticationAPI/logout?all=true';
+                                    }
+                                    else {
+                                        $alert('', d.error, 'danger');
+                                    }
+                                }, () => { });
+                            }
+                        },
+                        Cancel: () => {
+                            // do nothing.
+                        }
+                    }
+                });
+            },
+            logoutClick() {
+                $.confirm({
+                    title: '<i class="fas fa-sign-out-alt"></i> ' + this.ui.log_out,
+                    content: this.ui.log_out_message,
+                    theme: 'supervan',
+                    buttons: {
+                        logOutThis: {
+                            text: this.ui.this_device,
+                            btnClass: 'btn-default',
+                            action: function () {
+                                window.location = baseUrl + 'AuthenticationAPI/logout?all=false';
+                            }
+                        },
+                        logOutAll: {
+                            text: this.ui.all_devices,
+                            btnClass: 'btn-default',
+                            action: function () {
+                                window.location = baseUrl + 'AuthenticationAPI/logout?all=true';
+                            }
+                        },
+                        cancel: {
+                            text: this.ui.cancel,
+                            btnClass: 'btn-default',
+                            action: function () {
+
+                            }
+                        },
+                    }
+                });
+            },
+            showAbout() {
+                $alert('About Mango ERP', `Mango Anywhere Web Application<br />Build Version : ${this.programmeData.version}<br />Users Online : ${this.userOnline.current} of ${this.userOnline.max}`, 'info');
+            },
+            Menu2() {
+                let data = $linq(menu2).where(w => w.module == this.getModule).toArray();
+                this.$set(this, 'dataMenu', data);
+            },
+            menuClick(control, page) {
+                if (page == "Index") {
+                    window.open(baseUrl + `WebView/Module/${control},${page}`, '_self');
+                }
+                else {
+                    window.open(baseUrl + `WebView/Module/${control},${page}`, '_self');
+                }
+            },
+            ExtendMenu(control, page) {
+                window.open(baseUrl + `${control}/${page}`, '_blank')
+            },
+            masterClick() {
+                $("#fsModal").modal("show");
+            },
+            loadMaster() {
+                let url = `WebView/Invoke/Center.CenterData,func_load_menu_master,,/`;
+                $dtl.get(url, (d) => {
+                    if ($dtl.isNullOrEmpty(d.error)) {
+                        this.$set(this, "master", d.data);
+                        $("#fsModal").modal("show");
+                    }
+                    else {
+                        $alert('Warning', d.error, 'warning');
+                    }
+                }, () => { });
+            },
+            signalR() {
+               let vuec = this;
+               let reHub = SJ.iwc.SignalR.getHubProxy('erpHub', {
+                    client: {
+                        displayMsg: function (msg) {
+                            console.log(msg);
+                        },
+                        welcomeMessage: function (text) {
+                            console.log(text);
+                        },
+                        logout: function () {
+                            window.location = baseUrl + 'AuthenticationApi/Logout';
+                        },
+                        displaySessionOn:  function(sessionsOn, sessionsMax) {
+                            vuec.$set(vuec.userOnline, 'current', sessionsOn || 0)
+                            vuec.$set(vuec.userOnline, 'max', sessionsMax || 0)
+                        }
+                    }
+                });
+                let signalrObj = {
+                    check_session_loop: null,
+                    check_state_loop: null,
+                    start: function (fn) {
+                        SJ.iwc.SignalR.start().done(function () {
+                            console.log("Connected Hubs : Mango Anywhere")
+                            if (fn) {
+                                fn();
+                            }
+                        });
+                    },
+                    check_session: function (fn) {
+                        reHub.server.userOnlineStatus($dtl.cookies.get('mg_erp_auth') || '', document.title, navigator.userAgent).done(function () {
+                            if (fn) {
+                                fn();
+                            }
+                        });
+                        console.log('Session Checked : ' + new Date());
+                    },
+                    check_notifi: function () {
+                        //reHub.server.notificationCheck();
+                    }
+                };
+                SJ.iwc.SignalR.on('connected', function () {
+                    console.log('connected owned ' + SJ.iwc.SignalR.isConnectionOwner());
+                    if (SJ.iwc.SignalR.isConnectionOwner()) {
+                        signalrObj.check_session(function () {
+                            //signalrObj.check_notifi();
+                        });
+                    }
+                    if (!signalrObj.check_session_loop && SJ.iwc.SignalR.isConnectionOwner()) {
+                        console.log('start sync this connection');
+                        signalrObj.check_session_loop = setInterval(function () { signalrObj.check_session() }, 60000);
+                    } else {
+                        if (signalrObj.check_session_loop) {
+                            clearInterval(signalrObj.check_session_loop);
+                        }
+                        signalrObj.check_session_loop = null;
+                    }
+                });
+                SJ.iwc.SignalR.on('disconnected', function () {
+                    console.log('disconnected')
+                    if (signalrObj.check_session_loop) {
+                        clearInterval(signalrObj.check_session_loop);
+                        signalrObj.check_session_loop = null;
+                        // console.log('end sync this connection')
+                    }
+                    if (SJ.iwc.SignalR.isConnectionOwner()) {
+                        if (!signalrObj.check_state_loop) {
+                            signalrObj.check_state_loop = setInterval(function () {
+                                if (SJ.iwc.SignalR.getState() == 4) {
+                                    console.log('try to connect again');
+                                    signalrObj.start();
+                                } else {
+                                    clearInterval(signalrObj.check_state_loop);
+                                    signalrObj.check_state_loop = null;
+                                    console.log('clear reconnect');
+                                }
+                            }, 30000);
+                        }
+                    } else {
+                        if (signalrObj.check_state_loop) {
+                            clearInterval(signalrObj.check_state_loop);
+                            signalrObj.check_state_loop = null;
+                            console.log('clear reconnect');
+                        }
+                    }
+                });
+                signalrObj.start(function () {
+                    if (!SJ.iwc.SignalR.isConnectionOwner()) {
+                        signalrObj.check_session(function () {
+                            //signalrObj.check_notifi();
+                        });
+                    }
+                });
+            },
+            selectUiLang(t) {
+                $confirm(this.ui.alert_leave_page, () => {
+                    $dtl.cookies.set('global_ui_lang', t, 365 * 10);
+                    window.location = window.location;
+                });
+            },
+            backTo() {
+                if (this.getModule == "Home") {
+                    return window.location.href = this.baseUrl;
+                }
+                else {
+                    this.menuClick("Home", "Index");
+                }
+            }
+        },
+        mounted() {
+            $('body').fadeIn(300);
+            this.signalR();
+            @{
+                var checkMenu = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+            }
+            let checkMenu = @(Html.Raw(Dtl.json_stringify(checkMenu)));
+            if (checkMenu != "Home") {
+                this.setBackPath = this.setUrl.split("/");
+                this.setModule = this.setBackPath[4];
+                this.setModule2 = this.setModule.split(",");
+                this.getModule = this.setModule2[0];
+                this.indexModule = this.setModule2[1];
+            }
+            if (!['Master','SE','Setup','Home'].includes(this.getModule)) {
+                this.Menu2();
+                this.showTabBar = true;
+            }
+        }
+    })
+</script>

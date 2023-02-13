@@ -1,0 +1,25 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@(ViewBag.Title)</title>
+    <link href="~/Framework2/Lib/ERP.theme/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/Framework2/Lib/fontawesome-free-5.2.0-web/css/all.css" rel="stylesheet" />
+    <link href="~/Framework2/Lib/ERP.theme/css/animate.css" rel="stylesheet">
+    <link href="~/Framework2/Lib/ERP.theme/css/style.css" rel="stylesheet">
+    <link href="~/Framework2/Lib/ERP.theme/css/mango.css" rel="stylesheet" />
+</head>
+<body class="gray-bg">
+
+    @RenderBody()
+
+    <script src="~/Scripts/jquery-3.3.1.js"></script>
+    <script src="~/Framework2/Lib/ERP.theme/js/popper.min.js"></script>
+    <script src="~/Framework2/Lib/ERP.theme/js/bootstrap.js"></script>
+    @RenderSection("scripts", false)
+</body>
+</html>

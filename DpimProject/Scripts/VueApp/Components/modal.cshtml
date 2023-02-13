@@ -1,0 +1,56 @@
+﻿<script type="text/x-template" id="vue-component-modal">
+    <div>
+        <div class="modal fade" ref="myModal">
+            <div class="modal-dialog" v-bind:style="{'height':setModal.height+'%','width':setModal.width+'%'}" v-bind:class="[modalSize]">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header" style="height:60px">
+                        <slot name="header"></slot>
+                        @*<button type="button" class="close" data-dismiss="modal">&times;</button>*@
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <slot name="body"></slot>
+                    </div>
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <slot name="footer"></slot>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+<script>
+    Vue.component('modal', {
+        template: '#vue-component-modal',
+        data() {
+            return {
+                modalSize: 'modal-xl',
+                setModal: {
+                 
+                }
+            };
+        },
+        methods: {
+            openModal() {
+                $(this.$refs.myModal).modal('show');
+            },
+            closeModal() {
+                $(this.$refs.myModal).modal('hide');
+            },
+            setSize(t) {
+                this.$set(this, 'modalSize', t);
+
+            },
+            setStyle(e) {
+                this.$set(this, 'setModal', e);
+
+            },
+
+        }
+    });
+</script>

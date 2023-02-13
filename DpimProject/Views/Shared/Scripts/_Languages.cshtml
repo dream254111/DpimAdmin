@@ -1,0 +1,69 @@
+﻿<script>
+    let resources = {
+        "CH": {
+            "translation": {
+                "language": "China",
+                "title": "页面标题",
+                "placeholder_1": "输入您的名字",
+                "value_1": "值",
+                "biddingsystem": "招標系統",
+                "officeservicesystem": "辦公服務體系"
+            }
+        },
+        "EN": {
+            "translation": {
+                "language": "English",
+                "title": "title of the page",
+                "placeholder_1": "enter name",
+                "value_1": "value 1",
+                "biddingsystem": "Bidding System",
+                "officeservicesystem": "Office Service System"
+            }
+        },
+        "TH": {
+            "translation": {
+                "language": "China",
+                "title": "ทดสอบครับ",
+                "placeholder_1": "enter name",
+                "value_1": "value 1",
+                "biddingsystem": "ระบบการเสนอราคา",
+                "officeservicesystem": "ระบบบริการสำนักงาน"
+            }
+        }
+    };
+
+    $(document).ready(function () {
+        i18n.init({
+            "lng": 'EN',
+            "resStore": resources,
+            "fallbackLng": 'EN'
+        }, function (t) {
+            $(document).i18n();
+        });
+
+        $('.lang').click(function () {
+            let lang = $(this).attr('data-lang');
+            if (lang == "TH") {
+                $('.imgLang').attr('src', baseUrl + "Content/language/flag_0003_Thailand.jpg");
+                $(".namelang").html('Thailand');
+            }
+            if (lang == "EN") {
+                $('.imgLang').attr('src', baseUrl + "Content/language/flag_0002_United Kingdom.jpg");
+                $(".namelang").html('English');
+            }
+            if (lang == "CH") {
+                $('.imgLang').attr('src', baseUrl + "Content/language/flag_0025_China.jpg");
+                $(".namelang").html('China');
+            }
+            i18n.init({
+                lng: lang
+            }, function (t) {
+                $(document).i18n();
+            });
+        });
+
+        $('.imgLang').attr('src', baseUrl + "Content/language/flag_0002_United Kingdom.jpg");
+        $(".namelang").html('English');
+
+    });
+</script>

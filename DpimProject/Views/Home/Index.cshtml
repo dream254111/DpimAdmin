@@ -1,0 +1,653 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+    Layout = "~/Views/Shared/_MainLayoutAdmin.cshtml";
+}
+
+<div id="vue-app" style="margin-top:50px;">
+    
+
+    <!-- Tab panes -->
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Username / Email</label>
+                    <input class="form-control" id="username" v-model.trim="authData.username" placeholder="Username" />
+                </div>
+                <div class="col-md-6">
+                    <label>Password</label>
+                    <input class="form-control" id="password" type="password" v-model.trim="authData.password" v-on:keyup.enter="AuthenLogin()" placeholder="Username" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <button class="btn btn-primary btn-xs pull-right" style="margin-top:20px;" v-on:click="AuthenLogin()">Login</button>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-danger btn-xs pull-right" style="margin-top:20px;" v-on:click="clearAppAuthen()">Clear Authen</button>
+
+    </div>
+
+
+      
+
+
+        @*<div role="tabpanel" class="tab-pane" id="AdminList">
+            <div class="row">
+                <div class="col-md-3">
+                    <label>Username</label>
+                    <input type="text" class="form-control" v-model="data.username" />
+                </div>
+                <div class="col-md-3">
+                    <label>Password</label>
+                    <input type="password" class="form-control" v-model="data.password" />
+                </div>
+
+            </div>
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-2 fa-pull-right">
+                        <button class="btn btn-success" v-on:click="newTopic()">Log in</button>
+                        <button class="btn btn-warning" v-on:click="CheckAuthen()">Check Token</button>
+                        <button class="btn btn-info" v-on:click="GenerateCertificate()">Generate Certificate</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <select v-model="data.type_upload">
+                    <option v-for="x in type" :select="x.type_upload"> {{x.type_name}}</option>
+
+                </select>
+                <fileupload ref="picture_files" class="form-control input-sm" v-on:change="uploadFile()"></fileupload>
+
+                <div v-for="x in listImg" v-if="listImg.length >0">
+                    <img v-bind:src="x.src" />
+
+                </div>
+                <button class="btn btn-primary" v-on:click="change_original()">Original</button>
+                <button class="btn btn-primary" v-on:click="change_480()">480P</button>
+                <button class="btn btn-primary" v-on:click="change_720()">720P</button>
+                <button class="btn btn-primary" v-on:click="change_1080()">1080HD</button>
+                <div style="width: 100%; height:auto; overflow: hidden;">
+                    <video oncontextmenu="return false;" ref="myVideo" id="Video_" style="width: 100%;" controls>
+                        <source v-bind:src="trueUtl+'File/Stream2?filename=20201203213945104852_480.mp4'" type="video/mp4" style="width:500px;height:500px;">
+                    </video>
+
+                    <div class="col-md-2">
+                        <a v-bind:href="trueUrl+'File/Stream2Large?filename='+download" class="btn btn-success btn-xs" target="_blank">Download</a>
+                    </div>
+                    <div class="col-md-2 pull-right">
+                        <a class="btn btn-primary btn-xs" v-on:click="Skip_Sec()">Skip</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <a v-for="x in videoList" v-on:click="loadVideo(x.filename)">
+                        <img v-bind:src="x.cover" width="200" height="200" />
+                    </a>
+
+                </div>
+            </div>
+            <div class="row">
+                <div v-for="(x,idx) in examData">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>{{idx+1}}.) {{x.question}}</label>
+
+                        </div>
+                        <div v-for="(j,index) in x.detail">
+                            <div class="col-md-6">
+                                <input v-model="j.student_answer" type="radio" :name="idx" value="Y" /> <label> {{index+1}} {{j.answer}}</label>
+
+                            </div>
+                            <br />
+
+                        </div>
+
+                    </div>
+                    <hr />
+                </div>
+                <button class="btn btn-info" v-on:click="sendExam()">SendExam</button>
+
+            </div>
+        </div>*@
+        @*<div role="tabpanel" class="tab-pane" id="login">
+<div class="row">
+    <div class="col-md-6">
+        <div class="row">
+            <div class="col-md-3">
+                <label>Username / Email</label>
+                <input class="form-control" v-model.trim="authData.username" placeholder="Username" />
+            </div> 
+            <div class="col-md-3">
+                <label>Password</label>
+                <input class="form-control" type="password" v-model.trim="authData.password" placeholder="Username" />
+            </div>
+        </div>
+        <div class="row">
+        <div class="col-md-6">
+            <button class="btn btn-primary btn-xs pull-right" style="margin-top:20px;" v-on:click="AuthenLogin()">Login</button>
+        </div>    
+        </div>
+    </div>
+</div>
+        </div>*@
+
+    </div>
+
+
+@section scripts{
+    <script>
+        //var video = document.getElementById("Video_");
+        //var source = video.getElementsByTagName("source");
+
+       
+        //window.addEventListener("beforeunload", function (e) {
+        //    var confirmationMessage = "\o/";
+           
+
+        //    (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+          
+
+        //    return confirmationMessage;                            //Webkit, Safari, Chrome
+
+
+        //});
+
+        //window.onbeforeunload = function (e) {
+        //    //var video = document.getElementById("myVideo");
+
+        //    console.log(source[0].src)
+        //    console.log((video.currentTime / video.duration) * 100);
+        //    var data = {
+        //        video_progress: {
+        //            video_path: source[0].src,
+        //            video_position: video.currentTime,
+        //            video_progress: (video.currentTime/video.duration) * 100,
+        //            student_id: 1,
+        //            course_id:3
+        //        }
+        //    }
+
+        //    $dtl.post(data, `http://192.168.2.40/DpimProjectV2/Student/StudentVideoProgress`, d => {
+
+
+        //        if (!d.success) {
+        //            $alert('Error', d.error, 'danger');
+
+        //        }
+        //        else {
+        //            $alert('Success', 'Success', 'success');
+        //            //let xhr = new window.XMLHttpRequest();
+        //            //xhr.getResponseHeader('Set-Cookie');
+
+
+        //        }
+        //    }, () => {
+
+        //    });
+        //    e.preventDefault();
+        //}
+
+        //function ForwardTime() {
+        //    //video.play();
+        //    //video.pause();
+        //    video.currentTime = 7;
+        //    //video.play();
+        //    //video.currentTime = 64.4200;
+        //    //document.write("<a href=/time.htm?currentTime='.media.addEventListener(10, isdurationchange, true).'></a>;); 
+        //    //video.currentTime = 64;
+        //    //console.log(video.currentTime);'http://192.168.2.40/DpimProjectV2/'
+
+        //} http://dpimacademy-apis.dpim.go.th/ApiBackend/
+
+        var trueUtl = 'https://dpimproject.ddns.net/dpimprojectV2/';
+            $('#timeline').css("height", ($(window).height()));
+        let vue = new Vue({
+            el: '#vue-app',
+            data: {
+                postback_dataProject: {},
+                postback_dataRetrieveDocument: {},
+                showModal: false,
+                data: {},
+                dataMaincom: [],
+                trueUrl: trueUtl,
+                subject: {},
+                topicData: {},
+                header: [],
+                sbj_header: {},
+                detail: [],
+                message: "",
+                bc: {},
+                param: {},
+                listImg: [],
+                fileData: {},
+                videoPath: {},
+                videoList:[],
+                token: "",
+                type: [
+                    {
+                        type_upload: "video",
+                        type_name:"Video"
+                    },   {
+                        type_upload: "exam",
+                        type_name:"Exam"
+                    },   {
+                        type_upload: "files",
+                        type_name:"Multiple"
+                    },   {
+                        type_upload: "file",
+                        type_name:"Single"
+                    },
+                ],
+                download:'',
+                examData: [],
+                RegisterData: {},
+                adminData: [],
+                authData: {},
+                password:""
+            },
+            methods: {
+                newTopic() {
+
+                    var data = {
+                        username: this.data.username,
+                        password: this.data.password
+                    };
+                    $dtl.post(data,trueUtl+ `Authentication/Login`, d => {
+
+                      
+                        //console.log($dtl.cookies.get("Set-Cookie"));
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+
+                        }
+                        else {
+                            //$alert('Success', 'Success', 'success');
+                            //let xhr = new window.XMLHttpRequest();
+                            //xhr.getResponseHeader('Set-Cookie');
+
+                            this.token = d.token;
+
+                        }
+                    }, () => {
+
+                    });
+
+                }, CheckAuthen() {
+                    var token = {
+                        token:this.token
+                    }
+                    var urlCourse = trueUtl +'Authentication/CheckToken';
+                    let xhr = new window.XMLHttpRequest();               
+           
+                    xhr.open("GET", urlCourse);
+                    xhr.send(xhr.setRequestHeader("Authorization", this.token));
+                    var data = {
+                        username: this.data.username,
+                        password: this.data.password
+                    };
+                    
+                    var urlEmail = 'http://192.168.2.121/DpimProjectV2/Management/SendingEmail';
+                    $dtl.get(urlCourse, d => {
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+
+                        }
+                        else {
+                            //$alert('Success', 'Success', 'success');
+
+                            this.dataTable = d.data.data;
+
+
+                        }
+                    }, () => {
+
+                    },null,token);
+
+                },
+           
+                uploadFile() {
+                    this.fileData = this.$refs.picture_files;
+
+                    var formData = new FormData();
+                    var file = {};
+                    for (var i = 0; i < this.fileData.formData.length; i++) {
+                        console.log(this.fileData.formData[i]);
+                        formData.append('file', this.fileData.formData[i]);
+                        //reader.readAsDataURL(myImage);
+                        file = { file: formData, filename: this.fileData.formData[i].name };
+                    }
+                    console.log(file);
+                    $dtl.post(formData, trueUtl +`FileUpload/VideoUpload`, d => {
+                        console.log(d);
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+                        }
+                        else {
+                            var video = document.getElementById("Video_");
+                    //document.removeChild('source');
+                    var source = video.getElementsByTagName('source');
+
+                    //video.pause();
+                            source[0].src = trueUtl + `File/Stream2?filename=` + d.data.original;
+                            video.volume = 0.5;
+                            this.videoPath.p_480 = d.data.original.substring(0, d.data.original.indexOf("_")) + "_480.mp4";
+                            this.videoPath.p_720 = d.data.original.substring(0, d.data.original.indexOf("_")) + "_720.mp4";
+                            this.videoPath.p_1080 = d.data.original.substring(0, d.data.original.indexOf("_")) + "_1080.mp4";
+                    //source.setAttribute('type', "video/mp4");
+                    //source.setAttribute('style', "width:500px;height:500px;");
+                    video.load();
+                    video.play();      
+                        }
+                    }, () => {
+
+                    });
+                }, change_original() {
+
+                    var video = document.getElementById("Video_");
+                    //video.removeChild('source');
+                    var source = video.getElementsByTagName('source');
+
+                    //video.pause();
+                    video.volume = 0.5;
+
+                    source[0].src = trueUtl + `File/loadCover?filename=20201203213945104852_480.mp4`;
+                    this.download = '20201203213945104852_480.mp4';
+                    //source.setAttribute('type', "video/mp4");
+                    //source.setAttribute('style', "width:500px;height:500px;");
+                    video.load();
+                    video.play();
+                },
+                change_480() {
+
+                    var video = document.getElementById("Video_");
+                    //document.removeChild('source');
+                    var source = video.getElementsByTagName('source');
+
+                    //video.pause();
+                    source[0].src = trueUtl + `File/Stream2?filename=` + this.videoPath.p_480;
+                    this.download = this.videoPath.p_480;
+
+                    //source.setAttribute('type', "video/mp4");
+                    //source.setAttribute('style', "width:500px;height:500px;");
+                    video.load();
+                    video.play();                },
+                change_720() {
+
+                    var video = document.getElementById("Video_");
+                    //document.removeChild('source');
+
+                    var source = video.getElementsByTagName('source');
+                    //video.pause();
+
+                    source[0].src = trueUtl + `File/Stream2?filename=` + this.videoPath.p_720;
+                    video.volume = 0.5;
+                    this.download = this.videoPath.p_720;
+
+                    //source.setAttribute('type', "video/mp4");
+                    //source.setAttribute('style', "width:500px;height:500px;");
+                    video.load();
+                    video.play();                },
+                change_1080() {
+
+                    var video = document.getElementById("Video_");
+                    //document.removeChild('source');
+
+                    var source = video.getElementsByTagName('source');
+                    //video.pause();
+
+                   source[0].src= trueUtl + `File/Stream2?filename=` + this.videoPath.p_1080;
+                    video.volume = 0.5;
+                    this.download = this.videoPath.p_1080;
+
+                    //source.setAttribute('type', "video/mp4");
+                    //source.setAttribute('style', "width:500px;height:500px;");
+                    video.load();
+                    video.play();
+                },
+                getVideo() {
+                    $dtl.get(trueUtl+"Management/GetVideo", d => {
+                        
+                            //$alert('Success', 'Success', 'success');
+
+                       
+                        for (var i = 0; i < d.data.data.length; i++) {
+                            d.data.data[i].cover = trueUtl + "File/loadcover?filename=" + d.data.data[i].cover
+                        }
+
+                        this.videoList = d.data.data;
+                    }, () => {
+
+                    });
+
+                }, loadVideo(filename) {
+
+                    var video = document.getElementById("Video_");
+                    //document.removeChild('source');
+                    var source = video.getElementsByTagName('source');
+
+                    //video.pause();
+                    source[0].src = trueUtl + `File/Stream2?filename=` + filename
+                    this.videoPath.p_480 = filename.substring(0, filename.indexOf("_")) + "_480.mp4";
+                    this.videoPath.p_720 = filename.substring(0, filename.indexOf("_")) + "_720.mp4";
+                    this.videoPath.p_1080 = filename.substring(0, filename.indexOf("_")) + "_1080.mp4";
+                    video.volume = 0.5;
+
+                    //source.setAttribute('type', "video/mp4");
+                    //source.setAttribute('style', "width:500px;height:500px;");
+                    video.load();
+                    video.play();           
+
+                },
+                Skip_Sec() {
+                    var video = document.getElementById("Video_");
+                    video.currentTime  =video.currentTime+ 10;
+                },  GetExam() {
+                    $dtl.get(trueUtl + "Student/ExamRead?course_id=3018", d => {
+
+                        //$alert('Success', 'Success', 'success');
+                        this.examData = d.data.data;
+
+                    }, () => {
+
+                    });
+                }, sendExam() {
+
+                    var data = [];
+                    for (var i = 0; i < this.examData.length; i++) {
+                        var examData = this.examData[i];
+                        for (var j = 0; j < examData.detail.length; j++) {
+                            var answerData = examData.detail[j];
+                            if (answerData.student_answer == "Y") {
+                                var d = {
+                                    course_exam_id: examData.exam_id,
+                                    course_id: examData.course_id,
+                                    student_id: 5,
+                                    is_pretest: 0,
+                                    course_exam_answer_id: answerData.order
+                                }
+                                data.push(d);
+
+                            }
+
+                        }
+                    }
+                       
+                        $dtl.post(data, trueUtl + `Student/ExamAnswer`, d => {
+
+
+                            //console.log($dtl.cookies.get("Set-Cookie"));
+                            if (!d.success) {
+                                $alert('Error', d.error, 'danger');
+
+                            }
+                            else {
+                                //$alert('Success', 'Success', 'success');
+                                //let xhr = new window.XMLHttpRequest();
+                                //xhr.getResponseHeader('Set-Cookie');
+
+
+                            }
+                        }, () => {
+
+                        });
+             
+                },
+                Register() {
+                    if (this.token != null) {
+                        this.Checkauth();
+                        
+                        var data = {
+                            user: this.RegisterData,
+                            token: this.token
+                        }
+                    if (this.RegisterData.password == this.RegisterData.confirm_password) {
+                        $dtl.post(data, trueUtl + `Authentication/RegisterAdmin`, d => {
+
+
+                            //console.log($dtl.cookies.get("Set-Cookie"));
+                            if (!d.success) {
+                                $alert('Error', d.error, 'danger');
+
+                            }
+                            else {
+                                $alert('Success', 'Success', 'success');
+                                this.AdminList();
+                                $('[href="#home"]').tab('show');
+                                this.RegisterData = {};
+                                //let xhr = new window.XMLHttpRequest();
+                                //xhr.getResponseHeader('Set-Cookie');
+
+                                //this.token = d.token;
+
+                            }
+                        }, () => {
+
+                        });
+                    } else {
+                        $alert('Error',"รหัสผ่านไม่ตรงกัน กรุณาแก้ไขใหม่อีกครั้ง", 'danger');
+
+                    }
+                    }
+
+                },
+                AdminList() {
+                    if (this.token != null) {
+                        $dtl.get(trueUtl + `Authentication/AdminList`, d => {
+
+
+                            //console.log($dtl.cookies.get("Set-Cookie"));
+                            if (!d.success) {
+                                $alert('Error', d.error, 'danger');
+
+                            }
+                            else {
+                                this.adminData = d.data.data;
+
+                                //let xhr = new window.XMLHttpRequest();
+                                //xhr.getResponseHeader('Set-Cookie');
+
+                                //this.token = d.token;
+
+                            }
+                        }, () => {
+
+                        });
+                    }
+                },
+                AdminSelect(x) {
+                    $('[href="#profile"]').tab('show');
+                   x.confirm_password = x.password;
+
+                    this.RegisterData = x;
+                },
+                AuthenLogin() {
+                    $dtl.post(this.authData,`Authentication/Login`, d => {
+
+
+                        //console.log($dtl.cookies.get("Set-Cookie"));
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+
+                        }
+                        else {
+                            //$alert('Success', 'Success', 'success');
+                            window.location = baseUrl + "Home/AdminManage";
+
+                            
+                            //let xhr = new window.XMLHttpRequest();
+                            //xhr.getResponseHeader('Set-Cookie');
+
+                            //this.token = d.token;
+
+                        }
+                    }, () => {
+
+                    });
+                }, clearAppAuthen() {
+                    var data = {
+                        token: this.RegisterData.password,
+                        token_admin: this.token
+                    }
+                    $dtl.post(data,`Authentication/ClearAppAuthen`, d => {
+
+
+                        //console.log($dtl.cookies.get("Set-Cookie"));
+                    
+                            this.token = d.token;
+                            this.RegisterData.password = d.password;
+                                $("#LoginPanel").hide();
+                                $("#adminDataList").show();
+                                $("#tab_profile").show();
+                                this.AdminList();
+
+                            
+                            //let xhr = new window.XMLHttpRequest();
+                            //xhr.getResponseHeader('Set-Cookie');
+
+                            //this.token = d.token;
+
+                        
+                    }, () => {
+
+                    });
+                }
+                //GenerateCertificate() {
+                //    $dtl.get(trueUtl + trueUrl+"File/ExamdownloadTemp", d => {
+                //        if (!d.success) {
+                //            $alert('Error', d.error, 'danger');
+
+                //        } else {
+                //                                        $alert('Success', 'Success', 'success');
+
+                //        }
+
+
+                //    }, () => {
+
+                //    });
+                //}
+                ////LoadFile() {
+                //    var filename = '20201129033350_593912.mp4';
+                //    this.videoPath = { src: "http://192.168.2.121/DpimProjectV2/File/Stream2VDO?filename=20201201085308348363\20201201085308348363_original.mp4.mp4" + filename };
+                //}
+
+                },
+            mounted() {
+
+                    const queryString = window.location.search;
+                    const urlParams = new URLSearchParams(queryString);
+                    this.param = {
+                        subject_id: urlParams.get('subject_id')
+                    };
+                this.getVideo();
+           
+            },
+
+            });
+    </script>
+}

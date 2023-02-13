@@ -1,0 +1,175 @@
+﻿@{
+    var auth = (MangoWebPool.Authentication.Authorize)ViewBag.Auth;
+}
+<style>
+    .btn-fixed {
+        width: 120px;
+        max-width: 120px;
+    }
+</style>
+
+<script type="text/x-template" id="vue-component-page-2">
+    <div>
+        <page-1>
+            <template slot="title">
+                <slot name="title"></slot>
+            </template>
+            <template slot="title-sm">
+                <slot name="title-sm"></slot>
+            </template>
+            <template slot="panel-menu">
+                <slot name="panel-menu"></slot>
+            </template>
+            <template slot="body">
+                <slot name="body"></slot>
+                <div style="position: fixed; top: 20px; right: 0; opacity: 1; cursor: pointer;" v-if="panel_func">
+                    <div class="theme-config">
+                        <div class="theme-config-box">
+                            <div class="spin-icon">
+                                <i class="fa ti-settings fa-spin"></i>
+                            </div>
+                            <div class="skin-settings">
+                                <div class="title">
+                                    Functions
+                                </div>
+                                <div class="setings-item">
+                                    <slot name="panel-menu"></slot>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <template slot="footer">
+                <div class="footer fixed">
+                    <div class="text-center d-none d-sm-block" v-if="!!footer_show">
+                        © @(DateTime.Now.Year == 2018 ? "2018" : "2018-" + DateTime.Now.Year) Mango Consultant Co., Ltd. | @auth.mainname | Online <span>Users Online : {{userOnline.current}} of {{userOnline.max}}</span> sessions | Build @(MangoWebPool.Program.Licence.BuildVersion)
+                    </div>
+                    <div z-index="99">
+                        <div class="row">
+                            <div class="col-6 d-none d-sm-block" v-if="!footer_show">
+                                <div class="text-left" style="margin-top:5px">© @(DateTime.Now.Year == 2018 ? "2018" : "2018-" + DateTime.Now.Year) Mango Consultant Co., Ltd. | @auth.mainname</div>
+                            </div>
+                            <div class="col-12 col-lg-6 col-md-6" v-if="allBtnShow">
+                                <div class="text-right">
+                                    <button class="btn btn-fixed btn-sm btn-primary" v-bind:disabled="btnRetrieve.disabled" v-if="btnRetrieve.show" v-on:click="btnRetrieveClick"><i class="fas fa-tasks"></i>&nbsp;{{ui.retrieve == null ? "Retrieve" : ui.retrieve}}</button>
+                                    <button class="btn btn-fixed btn-sm btn-info" v-bind:disabled="btnNew.disabled || menuRights.IsReadOnly" v-if="btnNew.show" v-on:click="btnNewClick"><i class="fas fa-file"></i>&nbsp;{{ui.new == null ? "New" : ui.new }}</button>
+                                    <button class="btn btn-fixed btn-sm btn-success" v-bind:disabled="btnSave.disabled || menuRights.IsReadOnly" v-if="btnSave.show" v-on:click="btnSaveClick"><i class="fas fa-save"></i>&nbsp;{{ui.save == null ? "Save" : ui.save}}</button>
+                                    <button class="btn btn-fixed btn-sm btn-danger" v-bind:disabled="btnDelete.disabled || menuRights.IsReadOnly" v-if="btnDelete.show" v-on:click="btnDeleteClick"><i class="fas fa-trash"></i>&nbsp;{{ui.delete == null ? "Delete" : ui.delete}}</button>
+                                    <button class="btn btn-fixed btn-sm btn-secondary" v-bind:disabled="btnPrint.disabled || menuRights.IsNotPrint" v-if="btnPrint.show" v-on:click="btnPrintClick"><i class="fas fa-file-export"></i>&nbsp;{{ui.print == null ? "Print" : ui.print}}</button>
+                                    <button class="btn btn-fixed btn-sm btn-dark" v-bind:disabled="btnSaveAs.disabled || menuRights.IsNotSaveAs" v-if="btnSaveAs.show" v-on:click="btnSaveAsClick"><i class="fas fa-file-export"></i> {{ui.saveas == null ? "Export As" : ui.saveas}}</button>
+                                    <button class="btn btn-fixed btn-sm btn-primary" v-bind:disabled="btnSaveToExcel.disabled" v-if="btnSaveToExcel.show" v-on:click="btnSaveToExcelClick"><i class="fas fa-file-excel-o"></i> {{ ui.savetoexcel == null ? "Save to Excel" : ui.savetoexcel}}</button>
+                                    <button class="btn btn-fixed btn-sm btn-primary" v-bind:disabled="btnAddRow.disabled" v-if="btnAddRow.show" v-on:click="btnAddRowClick"><i class="ti-plus"></i>&nbsp;{{ ui.addrow == null ? "Add Row" : ui.addrow}}</button>
+                                    <button class="btn btn-fixed btn-sm btn-primary" v-bind:disabled="btnInsertRow.disabled" v-if="btnInsertRow.show" v-on:click="btnInsertRowClick"><i class="ti-plus"></i>&nbsp;{{ ui.insertrow == null ? "Insert Row" : ui.insertrow}}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </page-1>
+    </div>
+</script>
+<script>
+    Vue.component('page-2', {
+        template: '#vue-component-page-2',
+        data() {
+            return {
+                btnRetrieve: {
+                    show: true,
+                    disabled: false,
+                    click() { }
+                },
+                btnNew: {
+                    show: true,
+                    disabled: false,
+                    click() { }
+                },
+                btnSave: {
+                    show: true,
+                    disabled: false,
+                    click() { }
+                },
+                btnSaveAs: {
+                    show: true,
+                    disabled: false,
+                    click() { }
+                },
+                btnDelete: {
+                    show: true,
+                    disabled: false,
+                    click() { }
+                },
+                btnPrint: {
+                    show: true,
+                    disabled: false,
+                    click() { }
+                },
+                btnSaveToExcel: {
+                    show: false,
+                    disabled: false,
+                    click() { }
+                },
+                btnAddRow: {
+                    show: false,
+                    disabled: false,
+                    click() { }
+                },
+                btnInsertRow: {
+                    show: false,
+                    disabled: false,
+                    click() { }
+                },
+                btnDeleteRow: {
+                    show: false,
+                    disabled: false,
+                    click() { }
+                },
+                userOnline: {
+                    current: 0,
+                    max: 0
+                },
+                menuRights: "",
+                ui: uiLang,
+                allBtnShow: true,
+                footer_show: false,
+                panel_func: false,
+            };
+        },
+        methods: {
+            btnRetrieveClick() {
+                this.btnRetrieve.click();
+            },
+            btnNewClick() {
+                this.btnNew.click();
+            },
+            btnSaveClick() {
+                this.btnSave.click();
+            },
+            btnSaveAsClick() {
+                this.btnSaveAs.click();
+            },
+            btnDeleteClick() {
+                this.btnDelete.click();
+            },
+            btnPrintClick() {
+                this.btnPrint.click();
+            },
+            btnSaveToExcelClick() {
+                this.btnSaveToExcel.click();
+            },
+            btnAddRowClick() {
+                this.btnAddRow.click();
+            },
+            btnInsertRowClick() {
+                this.btnInsertRow.click();
+            },
+            btnDeleteRowClick() {
+                this.btnDeleteRow.click();
+            }
+        },
+        mounted() {
+            this.menuRights = menuRights === null ? "" : menuRights;
+        }
+    })
+</script>

@@ -1,0 +1,54 @@
+﻿<script type="text/x-template" id="vue-component-pagination">
+    <div>
+        <ul class="pagination">
+            <li class="page-item" v-for="x in pageArray" v-bind:class="{'active':x.active}"><a class="page-link" href="#" v-on:click.prevent="changePage(x.page_no)">{{x.page_no}}</a></li>
+        </ul>
+    </div>
+</script>
+<script>
+
+    Vue.component('pagination', {
+        template: '#vue-component-pagination',
+        data() {
+            return {
+                page: new Pagination(),
+                pageArray: [],
+            }
+        },
+        methods: {
+            setItemsPerPage(n) {
+                this.page.setItemsPerPage(n);
+            },
+            getItemsPerPage() {
+                return this.page.getItemsPerPage();
+            },
+            setTotalItems(x) {
+                this.page.setTotalItems(x);
+            },
+            getTotalItems() {
+                return this.page.getTotalItems();
+            },
+            setCurrentPage(x) {
+                this.page.setCurrentPage(x);
+            },
+            getCurrentPage() {
+                return this.page.getCurrentPage();
+            },
+            getTotalPages() {
+                return this.page.getTotalPages();
+            },
+            skipItems() {
+                return this.page.skipItems();
+            },
+            getItemNo(index) {
+                return this.page.getItemNo(index);
+            },
+            createPagesArray() {
+                this.$set(this, 'pageArray', this.page.createPagesArray());
+            },
+            changePage(pn) {
+                this.$emit('page-change', { page: pn });
+            }
+        }
+    });
+</script>

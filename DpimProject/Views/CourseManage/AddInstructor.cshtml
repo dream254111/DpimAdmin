@@ -1,0 +1,50 @@
+﻿@{
+    ViewBag.Title = "Add Instructor Page";
+    Layout = "~/Views/Shared/_MainLayoutAdmin.cshtml";
+}
+
+<div class="course-add-container">
+    <div class="course-add-title">
+        <p class="course-add-text">คอร์สเรียนทั้งหมด</p>
+    </div>
+    <div class="course-add-subtitle">ผู้สอน</div>
+    <div class="course-add-image">
+        <img src="~/image/profile.jpg"/>
+    </div>
+    <button class="course-add-image-button">
+        <span>เพิ่มรูป</span>
+    </button>
+    <form>
+        <div class="column">
+            <label for="fname">ชื่อจริง</label><br />
+            <input name="fname" type="text" placeholder="กรอกข้อมูลที่นี่..." /><br />
+
+            <label for="position">ตำแหน่ง</label><br />
+            <input name="position" type="text" placeholder="กรอกข้อมูลที่นี่..." /><br />
+
+            <label for="email">อีเมล์</label><br />
+            <input name="email" type="email" placeholder="กรอกข้อมูลที่นี่..." /><br />
+
+            <label for="facebook">Facebook</label><br />
+            <input name="facebook" type="text" placeholder="กรอกข้อมูลที่นี่..." /><br />
+
+            <label for="instagram">Instagram</label><br />
+            <input name="instagram" type="text" placeholder="กรอกข้อมูลที่นี่..." /><br />
+        </div>
+        <div class="column">
+            <label for="lname">นามสกุล</label><br />
+            <input name="lname" type="text" placeholder="กรอกข้อมูลที่นี่..." /><br />
+
+            <label for="work">ที่ทำงาน</label><br />
+            <input name="work" type="text" placeholder="กรอกข้อมูลที่นี่..." /><br />
+
+            <label for="tel">เบอร์ติดต่อ</label><br />
+            <input name="tel" type="email" placeholder="กรอกข้อมูลที่นี่..." /><br />
+
+            <label for="twitter">Twitter</label><br />
+            <input name="twitter" type="text" placeholder="กรอกข้อมูลที่นี่..." /><br />
+        </div><br />
+        <label>คำอธิบายเพิ่มเติม</label><br />
+        <textarea style="left:16px; position:relative; width:436px;"></textarea>
+    </form>
+</div>

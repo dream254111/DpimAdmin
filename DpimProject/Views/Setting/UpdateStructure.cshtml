@@ -1,0 +1,99 @@
+﻿@{
+    ViewBag.Title = "Update Structure";
+    Layout = "~/Views/Shared/_LandingLayout.cshtml";
+}
+
+<section class="content" ng-controller="UpdateStructure" style="margin-top:50px;">
+    <div class="row">
+        <div class="col-xs-12">
+
+            <div class="box box-black ">
+                <div class="box-header with-border">
+                    Update Structure
+                </div>
+                <div class="box-body">
+
+                    <button ng-click="updatestruct()" class="btn btn-success" ng-disabled="waiting"><i class="fa fa-refresh"></i> Update</button>
+                    <button ng-click="cancel()" class="btn btn-danger"> Cancel</button>
+                    <span ng-show="waiting"><i class="fa fa-spinner fa-pulse fa-x2 fa-fw"></i> </span>
+                    {{start}} of {{total}} command(s) finished.
+                    <div ng-repeat="x in xxx" style="margin-top:10px;" class="res">
+                        <div class="alert text-black" ng-class="{'alert-danger':x.success==false, 'alert-success':x.success == true}" ng-show="x.success==true">
+                            {{$index + 1}}.<br>
+                            <strong>Success : {{x.success}}</strong><br />
+                            Command : {{x.command}}<br>
+                            Error Message : {{x.error}}<br>
+                            @@ <span class="text-sm">{{x.time}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-footer"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts{
+
+    <script>
+
+        var master = angular.module("master", []);
+        var baseUrl = $("base").first().attr("href");
+
+        master.controller('UpdateStructure', function ($scope, $http, $location, $filter) {
+            $scope.xxx = [];
+            $scope.total = 1;
+            $scope.start = 0;
+            $scope.take = 10;
+            $scope.waiting = false;
+
+            $scope.doUpdate = function () {
+
+                $http.get('@Url.Content("~/setting/UpdateStructureSql")?skip=' + $scope.start + "&take=" + $scope.take).then(function (response) {
+                    if (response.data) {
+
+                        for (var i = 0 ; i < response.data.result.length; i++) {
+                            if (response.data.result[i].command) {
+                                $scope.xxx.push(response.data.result[i]);
+                            }
+                            else {
+                                break;
+                            }
+                        }
+
+                        $scope.total = response.data.total;
+
+                        $scope.start += $scope.take;
+                        if ($scope.start > $scope.total) $scope.start = $scope.total;
+
+                        if ($scope.start < $scope.total && $scope.doprocess == true) {
+                            $scope.doUpdate();
+
+                        }
+                        else {
+                            $scope.doprocess = false;
+                            $scope.waiting = false;
+
+                            //$notify.success('อัพเดทสำเร็จ');
+                        }
+
+                    }
+                });
+            };
+            $scope.updatestruct = function () {
+                $scope.xxx = [];
+                $scope.total = 1;
+                $scope.start = 0;
+                $scope.doprocess = true;
+                $scope.waiting = true;
+                $scope.doUpdate();
+            };
+
+            $scope.cancel = function () {
+                $scope.doprocess = false;
+                $notify.success('ยกเลิกอัพเดท');
+            };
+        });
+    </script>
+
+}

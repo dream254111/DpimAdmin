@@ -1,0 +1,1837 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+    Layout = "~/Views/Shared/_MainLayoutAdmin.cshtml";
+
+}
+<link href="~/Content/signature_digital.css" rel="stylesheet" />
+
+<div id="vue-app" style="margin-top:50px;">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid" style="width:100%">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            @*<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">*@
+
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><b>{{authData.username}}</b> <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+
+                        <li><a href="@Url.Content("~/Authentication/Logout")">Log out</a></li>
+                    </ul>
+                </li>
+            </ul>
+            @*</div>*@<!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Admin List</a></li>
+        <li role="presentation" v-show="superadmin_permission=='Y'"><a href="#student"  v-on:click="tabselect()" aria-controls="Student" role="tab" data-toggle="tab">Student List</a></li>
+        <li role="presentation" v-show="superadmin_permission=='Y'"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab" id="tab_profile">Register Admin</a></li>
+        <li role="presentation" v-show="superadmin_permission=='Y'"><a href="#AdminList" aria-controls="admin" role="tab" data-toggle="tab">TEST</a></li>
+        <li role="presentation" v-show="superadmin_permission=='Y'"><a href="@Url.Content("~/Setting/UpdateStructure")">Update Structure</a></li>
+        <li role="presentation" v-show="superadmin_permission=='Y'"><a href="@Url.Content("~/Home/SendingEmail")">Send Email</a></li>
+        <li role="presentation" v-show="superadmin_permission=='Y'"><a href="#ImportFile" aria-controls="ImportFile" role="tab" data-toggle="tab">Import File</a></li>
+        @*<li role="presentation"><a href="#login" aria-controls="admin" role="tab" data-toggle="tab">Login</a></li>*@
+
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="home">
+
+            <div class="row">
+                <div class="col-md-12 col-xs-12 col-sm-12">
+
+                    <div class="input-group">
+                        <div class="input-group-btn ">
+                            <select v-model="select_type" style="width:150px" class="form-control " v-on:change="searchType()">
+                                <option value="" disabled>ค้นหาประเภท</option>
+                                <option value="2">Student</option>
+                                <option value="1">Admin</option>
+                            </select>
+                        </div>
+                        <input v-model.trim="search_text" ref="text_search" style="width:100%;" placeholder="Search" class="form-control " v-on:input="searchData()" />
+                        <div class="input-group-btn ">
+                            <select v-model.trim="department" v-on:change="searchDepart()" class="form-control" style="width:200px">
+                                <option value="">ค้นหาแผนก</option>
+
+                                <option v-for="(d,idx) in departmentData" v-bind:value="d.id">
+                                    {{d.department_name}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <table class="table table-hover table-bordered" id="adminDataList">
+                <thead style="background-color:#808080;color:white">
+                    <tr>
+                        <th align="center">No</th>
+                        <th align="center">Username</th>
+                        <th align="center">Email</th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    <tr v-show="adminData.length==0"><td colspan="3" style="text-align:center">--- No Data Retrive ---</td></tr>
+                    <tr v-for="(x,idx) in adminData" v-on:click="AdminSelect(x)" style="cursor:pointer;">
+                        <td align="center">{{idx+1}}</td>
+                        <td>{{x.username}}</td>
+                        <td>{{x.email}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <button class="btn btn-success btn-xs pull-right" style="margin-top:20px; display:none;" id="admin_btn" v-on:click="Checkauth()">Open Menu</button>
+
+            <div class="panel panel-default">
+                <div class="panel-heading"><h5>Admin Create</h5></div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-6 col-xs-12 col-sm-12">
+                                    <label> Username</label>
+                                    <input class="form-control" v-model.trim="RegisterData.username" v-bind:disabled="RegisterData.retrieve" placeholder="Username" />
+                                </div>
+                                <div class="col-md-2 col-xs-12 col-sm-12">
+                                    <button class="btn btn-warning btn-sm" style="margin-top:25px" v-on:click="ClearInput()">New</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 col-xs-12 col-sm-12">
+                                    <label> Password</label>
+                                    <input class="form-control" type="password" v-model.trim="RegisterData.password" placeholder="Password" />
+                                </div> <div class="col-md-6 col-xs-12 col-sm-12">
+                                    <label> Confirm Password</label>
+                                    <input class="form-control" type="password" v-model.trim="RegisterData.confirm_password" placeholder="Confirm Password" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 col-xs-12 col-sm-12">
+                                    <label> Email</label>
+                                    <input class="form-control" v-model.trim="RegisterData.email" v-bind:disabled="RegisterData.retrieve" placeholder="Email" />
+                                </div>
+                                <div class="col-md-6 col-xs-12 col-sm-12">
+                                    @*<label style="padding-top:20px;">สิทธิ User</label>*@
+                                    <div class="checkbox">
+                                        <label><input type="checkbox" name="role_id" value="1" v-model.trim="RegisterData.role_id" true-value="1" />Admin</label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label><input type="checkbox" name="role_id" value="2" v-model.trim="RegisterData.role_id" true-value="2" />Student</label>
+                                    </div>
+                                </div>
+                            </div>
+                            @*<div class="row">
+                                <div class="col-md-6">
+
+                                    <button class="btn btn-success btn-sm  pull-right" style="margin-top:30px;" v-on:click="Register()">Save</button>
+
+                                </div>
+                            </div>*@
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading"><h5>สิทธิการจัดการคอร์ส <p class="text-danger">{{warning_text}}</p></h5></div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4 col-xs-12 col-sm-12" v-show="departmentData.length>0">
+                            <div class="checkbox" v-for="(d,idx) in departmentData">
+
+                                <label>
+                                    <input type="checkbox" v-model.trim="d.status" true-value="Y" false-value="N" v-on:change="checkValue()" v-bind:disabled="d.disabled" />{{d.department_name}}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                 
+                </div>
+            </div>
+            @*<div class="panel-default">
+                <div class="panel-heading"><h5>Menu Permission</h5></div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="checkbox" v-for="(m,idx) in menu_permission" >
+                              <label>
+                                <input type="checkbox" v-model="m.status" true-value="Y" false-value="N" />
+                                {{m.menu_name}}
+                                  </label>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+
+                            <button class="btn btn-success btn-xs  pull-right" style="margin-top:30px;" v-on:click="Register()">Register</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>*@
+            <div class="panel panel-default" >
+                            <div class="panel-heading"><h5>สิทธิการเข้าถึงเมนู</h5></div>
+                            <div class="panel-body">
+
+                                <div class="row">
+                                    <div class="col-md-4 col-xs-12 col-sm-12">
+                                        <div class="checkbox" v-for="(m,idx) in admin_menu">
+                                            <label v-if="m.menu_type=='H'">
+                                                <input type="checkbox" v-model="m.status" true-value="Y" false-value="N" v-on:change="SelectHeader(m)" v-bind:disabled="m.disabled"/>
+                                                {{m.menu_name}}
+                                            </label>
+                                            <div v-if="m.menu_header!=null">
+
+                                                <label v.if="m.menu_type=='D'&& m.menu_id.includes(m.menu_id.substring(0,2)) " style="margin-left:15px;" v-on:change="SelectDetail(m)">
+                                                    <input type="checkbox" v-model="m.status" true-value="Y" false-value="N" v-bind:disabled="m.disabled"/>
+                                                    {{m.menu_name}}
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                                <div class="row">
+                                    <div class="col-md-2" style="margin-left:50%;margin-right:50%;">
+
+                                        <button class="btn btn-success btn-sm" style="margin-top:30px;" v-on:click="Register()">Save</button>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+        </div>
+        <div id="student" class="tab-pane">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row"><div class="col-md-12"><input ref="search_student" type="text" v-model.trim="student_search" placeholder="Search" class="form-control"  v-on:input="SearchStudent()"/></div></div>
+                    <table class="table  table-hover" id="studentData">
+                        <thead style="background-color:#808080;color:white">
+                            <tr>
+                                <th>Email</th>
+                                <th>Firstname</th>
+                                <th>Lastname</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-show="studentData.length==0"><td colspan="3" style="text-align:center">--- No Data Retrive ---</td></tr>
+
+                            <tr v-for="(x,idx) in studentData" v-on:click="selectStudent(x)" style="cursor:pointer;">
+                                <td>{{x.email}}</td>
+                                <td>{{x.firstname}}</td>
+                                <td>{{x.lastname}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        
+        <div class="panel panel-default">
+            <div class="panel-heading"><h5>Edit Profile</h5></div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-4" ><label>Email</label><input v-model.trim="manageData.email" placeholder="Email" class="form-control" disabled/></div>
+                    <div class="col-md-4" ><label>Firstname</label><input v-model.trim="manageData.firstname" placeholder="Firstname" class="form-control" disabled/></div>
+                    <div class="col-md-4" ><label>Lastname</label><input v-model.trim="manageData.lastname" placeholder="Lastname" class="form-control" disabled/></div>
+                </div>
+                <div class="row">
+
+                    <div class="col-md-4">
+                        <div class="checkbox">
+                            <label>
+
+                                <input type="checkbox" true-value="1" false-value="0" v-model.trim="manage_profile.is_edit_personal_info" />
+                                ข้อมูลส่วนตัว
+                            </label>
+                        </div>
+                    </div> <div class="col-md-4">
+                        <div class="checkbox">
+                            <label>
+
+                                <input type="checkbox" true-value="1" false-value="0" v-model.trim="manage_profile.is_edit_address" />
+                                ที่อยู่
+                            </label>
+                        </div>
+                    </div> <div class="col-md-4">
+                        <div class="checkbox">
+                            <label>
+
+                                <input type="checkbox" true-value="1" false-value="0" v-model.trim="manage_profile.is_edit_email" />
+                                อีเมลล์
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="checkbox">
+                            <label>
+
+                                <input type="checkbox" true-value="1" false-value="0" v-model.trim="manage_profile.is_edit_phone" />
+                                เบอร์โทรศัพท์
+                            </label>
+                        </div>
+                    </div>    <div class="col-md-4">
+                        <div class="checkbox">
+                            <label>
+
+                                <input type="checkbox" true-value="1" false-value="0" v-model.trim="manage_profile.is_edit_educational" />
+                                วุฒิการศึกษา
+                            </label>
+                        </div>
+                    </div>    <div class="col-md-4">
+                        <div class="checkbox">
+                            <label>
+
+                                <input type="checkbox" true-value="1" false-value="0" v-model.trim="manage_profile.is_edit_career" />
+                                อาชีพ
+                            </label>
+                        </div>
+                    </div>    <div class="col-md-4">
+                        <div class="checkbox">
+                            <label>
+
+                                <input type="checkbox" true-value="1" false-value="0" v-model.trim="manage_profile.is_edit_know_channal" />
+                                รู้จักเราผ่านทางช่องทางใด
+                            </label>
+                        </div>
+                    </div>  
+                    <div class="col-md-4">
+                        <div class="checkbox">
+                            <label>
+
+                                <input type="checkbox" true-value="1" false-value="0" v-model.trim="manage_profile.is_edit_business" />
+                                ข้อมูลสถานประกอบการ
+                            </label>
+                        </div>
+                    </div>      <div class="col-md-4">
+                        <div class="checkbox">
+                            <label>
+
+                                <input type="checkbox" true-value="1" false-value="0" v-model.trim="manage_profile.is_edit_front_id_document" />
+                                อัพโหลดเอกสารภาพบัตรประชาชนด้านหน้า
+                            </label>
+                        </div>
+                    </div>      <div class="col-md-4">
+                        <div class="checkbox">
+                            <label>
+
+                                <input type="checkbox" true-value="1" false-value="0" v-model.trim="manage_profile.is_edit_front_back_document" />
+                                อัพโหลดเอกสารภาพบัตรประชาชนด้านหลัง
+                            </label>
+                        </div>
+                    </div>      
+                    <div class="col-md-4">
+                        <div class="checkbox">
+                            <label>
+
+                                <input type="checkbox" true-value="1" false-value="0" v-model.trim="manage_profile.is_edit_selfie_document" />
+                                อัพโหลดภาพถ่ายหน้าตรง
+                            </label>
+                        </div>
+                    </div>   <div class="col-md-4">
+                        <div class="checkbox">
+                            <label>
+
+                                <input type="checkbox" true-value="1" false-value="0" v-model.trim="manage_profile.is_edit_business_document" />
+                                อัพโหลดเอกสารประกอบกิจการ
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="panel-footer">
+                <div class="row">
+                    <div class="col-md-12" ><button class="btn btn-success btn-sm" v-on:click="updateEditProfile()" style="margin-left:50%;margin-right:50%;">Save</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                <div role="tabpanel" class="tab-pane" id="AdminList">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <select v-model="data.type_upload">
+                                <option v-for="x in type" :select="x.type_upload"> {{x.type_name}}</option>
+
+                            </select>
+                            <fileupload ref="picture_files" class="form-control input-sm" v-on:change="uploadFile()"></fileupload>
+
+                            @*<div v-for="x in listImg" v-if="listImg.length >0">
+                            <img v-bind:src="x.src" />
+
+                        </div>
+                        <button class="btn btn-primary" v-on:click="change_original()">Original</button>
+                        <button class="btn btn-primary" v-on:click="change_480()">480P</button>
+                        <button class="btn btn-primary" v-on:click="change_720()">720P</button>
+                        <button class="btn btn-primary" v-on:click="change_1080()">1080HD</button>
+                        <div style="width: 100%; height:auto; overflow: hidden;">
+                            <video oncontextmenu="return false;"  ref="myVideo" id="Video_" v-on:change="Skip_Sec()" style="width: 100%;" controls>
+                                <source v-bind:src="trueUtl+'File/Stream?filename=20201203213945104852_480.mp4'" v-on:click="Skip_Sec()" type="video/mp4" style="width:500px;height:500px;">
+                            </video>
+
+                            <div class="col-md-2">
+                                <a v-bind:href="trueUrl+'File/StreamLarge?filename='+download" class="btn btn-success btn-xs" target="_blank">Download</a>
+                            </div>
+                            <div class="col-md-2 pull-right">
+                                <a class="btn btn-primary btn-xs" v-on:click="Skip_Sec()">Skip</a>
+                            </div>
+                        </div>*@
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>ชื่อผู้ลงนาม</label>
+                            <input type="text" v-model.trim="certificate.manager_name" class="form-control" />
+                        </div>
+                    </div>  <div class="row">
+                        <div class="col-md-4">
+                            <label>ตำแหน่ง</label>
+                            <input type="text" v-model.trim="certificate.positions" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <button class="btn btn-success btn-sm" v-on:click="SaveCertificate()">Save</button>
+                        </div>
+                    </div>
+                    @*<div class="col-md-6">
+                    <div class="row">
+                        <a v-for="x in videoList" v-on:click="loadVideo(x.filename)">
+                            <img v-bind:src="x.cover" width="200" height="200" />
+                        </a>
+
+                    </div>
+                </div>*@
+                    @*<div class="row">
+                    <div class="body">
+                        <div id="dialog" title="Digital Signature">
+                            To digitally sign the document, click the yellow signature icon <i class="fa fa-pencil dialog-pencil" aria-hidden="true"></i> located within the document. To proceed with signing, you acknowledge that the following digital representation of your signature
+                            is legally binding for this document.<br />
+                            <canvas id="myCanvasSignature" acknowledged-data="false" class="signature-pad" width="400" height="100"></canvas>
+                            <input id="UserName" name="UserName" type="hidden" value="My Signature">
+                        </div>
+                        <div id="change-sig" title="Edit Signature">
+                            Please provide your new digital signature representation.<br /><br />
+                            <canvas id="signature-pad" class="signature-pad" width="400" height="100"></canvas>
+                        </div>
+                        <div class="signature-card">
+                            <div class="legal-clause">
+                                Permission to use, copy, distribute or transfer NetHack is modified by someone other than this License, you agree to be a Contribution. Once a Contribution incorporated within the Work. If you find a bug in one of the Derived Work: A complete, unmodified
+                                copy of this License, each Contributor hereby grants You a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable (except as stated in Sections 2(a) and 2(b) above, Recipient receives no rights or licenses to distributors and reselle
+                                rs) that have been properly granted prior to termination shall survive any termination of this License, they do to the modified component from a Contributor includes the Program (independent of having been made by that Contributor to the trademarks
+                                or trade name in a trademark sense to endorse or promote products derived from the conditions of this Agreement; if the required attribution is deemed too intrusive. Modifications that you do at least one of the section as a whole is intended to prohibit,
+                                and hence do not apply to the terms of this License issued under Section 2(b) shall terminate as of the Work, thus creating a Derived Work can be in a commercial product offering, Product X.
+                            </div>
+                            <div class="sign-area">
+                                <div class="sign-block pull-right">
+                                    <div>Signature: <i class="fa fa-pencil" aria-hidden="true" onclick="Signature('jm38s4i1');"></i></div>
+                                    <canvas id="Sig-jm38s4i1" class="dig-sig " sig-id-data="jm38s4i1" signed-data="false" width="400" height="100"></canvas>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                    <div class="log-file">
+                        <p>Log file</p>
+                    </div>
+                </div>*@
+                </div>
+                <div role="tabpanel" class="tab-pane" id="ImportFile">
+                    <div id="ReactDemo"></div>
+                    <fileupload ref="import_files" class="form-control input-sm" v-on:change="ImportFile()"></fileupload>
+                </div>
+                @*<div role="tabpanel" class="tab-pane" id="AdminList">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label>Username</label>
+                        <input type="text" class="form-control" v-model="data.username" />
+                    </div>
+                    <div class="col-md-3">
+                        <label>Password</label>
+                        <input type="password" class="form-control" v-model="data.password" />
+                    </div>
+
+                </div>
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-md-2 fa-pull-right">
+                            <button class="btn btn-success" v-on:click="newTopic()">Log in</button>
+                            <button class="btn btn-warning" v-on:click="CheckAuthen()">Check Token</button>
+                            <button class="btn btn-info" v-on:click="GenerateCertificate()">Generate Certificate</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <select v-model="data.type_upload">
+                        <option v-for="x in type" :select="x.type_upload"> {{x.type_name}}</option>
+
+                    </select>
+                    <fileupload ref="picture_files" class="form-control input-sm" v-on:change="uploadFile()"></fileupload>
+
+                    <div v-for="x in listImg" v-if="listImg.length >0">
+                        <img v-bind:src="x.src" />
+
+                    </div>
+                    <button class="btn btn-primary" v-on:click="change_original()">Original</button>
+                    <button class="btn btn-primary" v-on:click="change_480()">480P</button>
+                    <button class="btn btn-primary" v-on:click="change_720()">720P</button>
+                    <button class="btn btn-primary" v-on:click="change_1080()">1080HD</button>
+                    <div style="width: 100%; height:auto; overflow: hidden;">
+                        <video oncontextmenu="return false;" ref="myVideo" id="Video_" style="width: 100%;" controls>
+                            <source v-bind:src="trueUtl+'File/Stream?filename=20201203213945104852_480.mp4'" type="video/mp4" style="width:500px;height:500px;">
+                        </video>
+
+                        <div class="col-md-2">
+                            <a v-bind:href="trueUrl+'File/StreamLarge?filename='+download" class="btn btn-success btn-xs" target="_blank">Download</a>
+                        </div>
+                        <div class="col-md-2 pull-right">
+                            <a class="btn btn-primary btn-xs" v-on:click="Skip_Sec()">Skip</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <a v-for="x in videoList" v-on:click="loadVideo(x.filename)">
+                            <img v-bind:src="x.cover" width="200" height="200" />
+                        </a>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div v-for="(x,idx) in examData">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label>{{idx+1}}.) {{x.question}}</label>
+
+                            </div>
+                            <div v-for="(j,index) in x.detail">
+                                <div class="col-md-6">
+                                    <input v-model="j.student_answer" type="radio" :name="idx" value="Y" /> <label> {{index+1}} {{j.answer}}</label>
+
+                                </div>
+                                <br />
+
+                            </div>
+
+                        </div>
+                        <hr />
+                    </div>
+                    <button class="btn btn-info" v-on:click="sendExam()">SendExam</button>
+
+                </div>
+            </div>*@
+                @*<div role="tabpanel" class="tab-pane" id="login">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label>Username / Email</label>
+                            <input class="form-control" v-model.trim="authData.username" placeholder="Username" />
+                        </div>
+                        <div class="col-md-3">
+                            <label>Password</label>
+                            <input class="form-control" type="password" v-model.trim="authData.password" placeholder="Username" />
+                        </div>
+                    </div>
+                    <div class="row">
+                    <div class="col-md-6">
+                        <button class="btn btn-primary btn-xs pull-right" style="margin-top:20px;" v-on:click="AuthenLogin()">Login</button>
+                    </div>
+                    </div>
+                </div>
+            </div>
+                    </div>*@
+
+            </div>
+        </div>
+
+
+@section scripts{
+    <script>
+      
+        //var video = document.getElementById("Video_");
+        //var source = video.getElementsByTagName("source");
+
+
+        //window.addEventListener("beforeunload", function (e) {
+        //    var confirmationMessage = "\o/";
+
+
+        //    (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+
+
+        //    return confirmationMessage;                            //Webkit, Safari, Chrome
+
+
+        //});
+
+        //window.onbeforeunload = function (e) {
+        //    //var video = document.getElementById("myVideo");
+
+        //    console.log(source[0].src)
+        //    console.log((video.currentTime / video.duration) * 100);
+        //    var data = {
+        //        video_progress: {
+        //            video_path: source[0].src,
+        //            video_position: video.currentTime,
+        //            video_progress: (video.currentTime/video.duration) * 100,
+        //            student_id: 1,
+        //            course_id:3
+        //        }
+        //    }
+
+        //    $dtl.post(data, `http://192.168.2.40/DpimProjectV2/Student/StudentVideoProgress`, d => {
+
+
+        //        if (!d.success) {
+        //            $alert('Error', d.error, 'danger');
+
+        //        }
+        //        else {
+        //            $alert('Success', 'Success', 'success');
+        //            //let xhr = new window.XMLHttpRequest();
+        //            //xhr.getResponseHeader('Set-Cookie');
+
+
+        //        }
+        //    }, () => {
+
+        //    });
+        //    e.preventDefault();
+        //}
+
+        //function ForwardTime() {
+        //    //video.play();
+        //    //video.pause();
+        //    video.currentTime = 7;
+        //    //video.play();
+        //    //video.currentTime = 64.4200;
+        //    //document.write("<a href=/time.htm?currentTime='.media.addEventListener(10, isdurationchange, true).'></a>;);
+        //    //video.currentTime = 64;
+        //    //console.log(video.currentTime);'http://192.168.2.40/DpimProjectV2/'
+
+        //} http://dpimacademy-apis.dpim.go.th/ApiBackend/
+        var vid = document.getElementById("Video_");
+        var supposedCurrentTime = 0;
+        //vid.addEventListener('timeupdate', function () {
+        //    if (!vid.seeking) {
+        //        supposedCurrentTime = vid.currentTime;
+        //        }
+        //    });
+        //    // prevent user from seeking
+        //vid.addEventListener('seeking', function () {
+        //        // guard agains infinite recursion:
+        //        // user seeks, seeking is fired, currentTime is modified, seeking is fired, current time is modified, ....
+        //    var delta = vid.currentTime - supposedCurrentTime;
+        //        if (Math.abs(delta) > 0.01) {
+        //            console.log("Seeking is disabled");
+        //            vid.currentTime = supposedCurrentTime;
+        //        }
+        //    });
+        //    // delete the following event handler if rewind is not required
+        //vid.addEventListener('ended', function () {
+        //        // reset state in order to allow for rewind
+        //        supposedCurrentTime = 0;
+        //});
+      
+        var trueUtl = 'https://dpimproject.ddns.net/dpimprojectV2/';
+        $('#timeline').css("height", ($(window).height()));
+        let vue = new Vue({
+            el: '#vue-app',
+            data: {
+                dataRetrieve: [],
+                permission: admin,
+                admin_menu: [],
+                superadmin_permission: '',
+                postback_dataProject: {},
+                postback_dataRetrieveDocument: {},
+                showModal: false,
+                data: {},
+                dataMaincom: [],
+                trueUrl: trueUtl,
+                subject: {},
+                permiss_data: [],
+                topicData: {},
+                header: [],
+                sbj_header: {},
+                detail: [],
+                message: "",
+                bc: {},
+                param: {},
+                listImg: [],
+                search: { select_type: '1', department: '' },
+                fileData: {},
+                videoPath: {},
+                videoList: [],
+                select_type: "",
+                token: "",
+                certificate: {},
+                depart: [],
+                menu_permission: [{ menu_id: "1001", menu_name: "ภาพรวมของผู้เรียน", status: "N" }, { menu_id: "1002", menu_name: "จัดการคอร์ส", status: "N" }, { menu_id: "1003", menu_name: "จัดการ", status: "N" }, { menu_id: "1004", menu_name: "อื่นๆ", status: "N" }],
+                type: [
+                    {
+                        type_upload: "video",
+                        type_name: "Video"
+                    }, {
+                        type_upload: "exam",
+                        type_name: "Exam"
+                    }, {
+                        type_upload: "files",
+                        type_name: "Multiple"
+                    }, {
+                        type_upload: "file",
+                        type_name: "Single"
+                    },
+                ],
+                download: '',
+                examData: [],
+                RegisterData: {},
+                adminData: [],
+                authData: {},
+                password: "",
+                department: '',
+                search_text: "",
+                deleteBtn: false,
+                menuData: { menu_type: "", menu_header: null },
+                menuShow: false,
+                departmentData: [],
+                dataSearch: [],
+                authData: {},
+                studentData: [],
+                //manage_profile: [{ desc: "is_edit_personal_info", name: "ข้อมูลส่วนตัว", status: "N" }, { desc: "is_edit_address", name: "ที่อยู่", status: "N" }, { desc: "is_edit_email", name: "อีเมลล์", status: "N" }
+                //    , { desc: "is_edit_phone", name: "เบอร์โทรศัพท์", status: "N" }, { desc: "is_edit_educational", name: "วุฒิการศึกษา", status: "N" }, { desc: "is_edit_career", name: "อาชีพ", status: "N" }
+                //    , { desc: "is_edit_know_channal", name: "รู้จักเราผ่านทางช่องทางใด", status: "N" }, { desc: "is_edit_business", name: "ข้อมูลสถานประกอบการ", status: "N" }, { desc: "is_edit_front_id_document", name: "อัพโหลดเอกสารภาพบัตรประชาชนด้านหน้า", status: "N" }
+                //    , { desc: "is_edit_front_back_document", name: "อัพโหลดเอกสารภาพบัตรประชาชนด้านหลัง", status: "N" }, { desc: "is_edit_selfie_document", name: "อัพโหลดภาพถ่ายหน้าตรง", status: "N" }, { desc: "is_edit_business_document", name: "อัพโหลดเอกสารประกอบกิจการ", status: "N" }],
+                manage_profile: {
+                    is_edit_personal_info: 0, is_edit_address: 0, is_edit_email: 0, is_edit_phone: 0, is_edit_educational: 0, is_edit_career: 0,
+                    is_edit_know_channal: 0, is_edit_business: 0, is_edit_front_id_document: 0, is_edit_front_back_document: 0, is_edit_front_back_document: 0, is_edit_front_back_document: 0, is_edit_selfie_document: 0, is_edit_business_document:0
+                },
+                student_id: "",
+                student_search: "",
+                studentRetrieve: [],
+                manageData: {},
+                warning_text: "",
+            },
+            methods: {
+                newTopic() {
+
+                    var data = {
+                        username: this.data.username,
+                        password: this.data.password
+                    };
+                    $dtl.post(data, trueUtl + `Authentication/Login`, d => {
+
+
+                        //console.log($dtl.cookies.get("Set-Cookie"));
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+
+                        }
+                        else {
+                            //$alert('Success', 'Success', 'success');
+                            //let xhr = new window.XMLHttpRequest();
+                            //xhr.getResponseHeader('Set-Cookie');
+
+                            this.token = d.token;
+
+                        }
+                    }, () => {
+
+                    });
+
+                }, CheckAuthen() {
+                    var token = {
+                        token: this.token
+                    }
+                    var urlCourse = trueUtl + 'Authentication/CheckToken';
+                    let xhr = new window.XMLHttpRequest();
+
+                    xhr.open("GET", urlCourse);
+                    xhr.send(xhr.setRequestHeader("Authorization", this.token));
+                    var data = {
+                        username: this.data.username,
+                        password: this.data.password
+                    };
+
+                    var urlEmail = 'http://192.168.2.121/DpimProjectV2/Management/SendingEmail';
+                    $dtl.get(urlCourse, d => {
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+
+                        }
+                        else {
+                            //$alert('Success', 'Success', 'success');
+
+                            this.dataTable = d.data.data;
+
+
+                        }
+                    }, () => {
+
+                    }, null, token);
+
+                },
+
+                uploadFile() {
+                    this.fileData = this.$refs.picture_files;
+
+                    var formData = new FormData();
+                    var file = {};
+                    for (var i = 0; i < this.fileData.formData.length; i++) {
+                        console.log(this.fileData.formData[i]);
+                        formData.append('file', this.fileData.formData[i]);
+                        //reader.readAsDataURL(myImage);
+                        file = { file: formData, filename: this.fileData.formData[i].name };
+                    }
+                    console.log(file);
+                    $dtl.post(formData, trueUtl + `FileUpload/FileUpload?max_w=67&max_h=47`, d => {
+                        console.log(d);
+                        if (!d[0].success) {
+                            $alert('Error', d.error, 'danger');
+                        }
+                        else {
+                            $alert("Success", "Success", 'success');
+                            this.certificate.path = d[0].filepath;
+                            //var video = document.getElementById("Video_");
+                            ////document.removeChild('source');
+                            //var source = video.getElementsByTagName('source');
+
+                            ////video.pause();
+                            //source[0].src = d.data.original;
+                            //video.volume = 0.5;
+                            //this.videoPath.p_480 = + d.data.p_480;
+                            //this.videoPath.original = d.data.original;
+                            //this.videoPath.p_720 = d.data.p_720;
+                            //this.videoPath.p_1080 = d.data.p_1080;
+                            ////source.setAttribute('type', "video/mp4");
+                            ////source.setAttribute('style', "width:500px;height:500px;");
+                            //video.load();
+                            //video.play();
+                        }
+                    }, () => {
+
+                    });
+                },
+                menuChange() {
+                    if (this.menuData == null) {
+                        this.deleteBtn = false;
+                    }
+                    if (this.menuShow) {
+                        this.menuShow = false;
+                    } else {
+                        this.menuShow = true;
+                    }
+                },
+                SaveCertificate() {
+                    $dtl.post(this.certificate, trueUtl + `Management/SignatureCertificate`, d => {
+                        console.log(d);
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+                        }
+                        else {
+                            $alert('Success', "success", 'success');
+
+                        }
+                    }, () => {
+
+                    });
+                },
+                ImportFile() {
+                    this.fileData = this.$refs.import_files;
+
+                    var formData = new FormData();
+                    var file = {};
+                    for (var i = 0; i < this.fileData.formData.length; i++) {
+                        console.log(this.fileData.formData[i]);
+                        formData.append('file', this.fileData.formData[i]);
+                        //reader.readAsDataURL(myImage);
+                        file = { file: formData, filename: this.fileData.formData[i].name };
+                    }
+                    console.log(file);
+                    $dtl.post(formData, trueUtl + `FileUpload/VoucherImport?course_id=0901045`, d => {
+                        console.log(d);
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+                        }
+                        else {
+                            $alert('Success', "success", 'success');
+
+                        }
+                    }, () => {
+
+                    });
+                },
+                change_original() {
+
+                    var video = document.getElementById("Video_");
+                    //video.removeChild('source');
+                    var source = video.getElementsByTagName('source');
+                    //var current = video.currentTime;
+                    //video.pause();
+                    video.volume = 0.5;
+
+                    source[0].src = trueUtl + `File/loadCover?filename=` + this.videoPath.original;
+                    this.download = '20201203213945104852_480.mp4';
+                    //source.setAttribute('type', "video/mp4");
+                    //source.setAttribute('style', "width:500px;height:500px;");
+                    video.load();
+                    //video.currentTime = current;
+
+                    video.play();
+
+                },
+                change_480() {
+
+                    var video = document.getElementById("Video_");
+                    //document.removeChild('source');
+                    var source = video.getElementsByTagName('source');
+                    var current = video.currentTime;
+
+                    //video.pause();
+                    source[0].src = trueUtl + `File/Stream?filename=` + this.videoPath.p_480;
+                    this.download = this.videoPath.p_480;
+
+                    //source.setAttribute('type', "video/mp4");
+                    //source.setAttribute('style', "width:500px;height:500px;");
+                    video.load();
+                    video.currentTime = current;
+
+                    video.play();
+
+                },
+                change_720() {
+
+                    var video = document.getElementById("Video_");
+                    var supposedCurrentTime = 0;
+
+
+                    //document.removeChild('source');
+                    var current = video.currentTime;
+
+                    var source = video.getElementsByTagName('source');
+                    //video.pause();
+
+                    source[0].src = trueUtl + `File/Stream?filename=` + this.videoPath.p_720;
+                    video.volume = 0.5;
+                    this.download = this.videoPath.p_720;
+
+                    //source.setAttribute('type', "video/mp4");
+                    //source.setAttribute('style', "width:500px;height:500px;");
+                    video.load();
+                    video.currentTime = current;
+
+                    video.play();
+                },
+                change_1080() {
+
+                    var video = document.getElementById("Video_");
+                    //document.removeChild('source');
+                    var current = video.currentTime;
+
+                    var source = video.getElementsByTagName('source');
+                    //video.pause();
+
+                    source[0].src = trueUtl + `File/Stream?filename=` + this.videoPath.p_1080;
+                    video.volume = 0.5;
+                    this.download = this.videoPath.p_1080;
+
+                    //source.setAttribute('type', "video/mp4");
+                    //source.setAttribute('style', "width:500px;height:500px;");
+                    video.load();
+                    video.currentTime = current;
+
+                    video.play();
+
+                },
+                getVideo() {
+                    $dtl.get(trueUtl + "Management/GetVideo", d => {
+
+                        //$alert('Success', 'Success', 'success');
+
+
+                        for (var i = 0; i < d.data.data.length; i++) {
+                            d.data.data[i].cover = trueUtl + "File/loadcover?filename=" + d.data.data[i].cover
+                        }
+
+                        this.videoList = d.data.data;
+                    }, () => {
+
+                    });
+
+                }, loadVideo(filename) {
+
+                    var video = document.getElementById("Video_");
+                    //document.removeChild('source');
+                    var source = video.getElementsByTagName('source');
+
+                    //video.pause();
+                    source[0].src = trueUtl + `File/Stream?filename=` + filename
+                    this.videoPath.p_480 = filename.substring(0, filename.indexOf("_")) + "_480.mp4";
+                    this.videoPath.p_720 = filename.substring(0, filename.indexOf("_")) + "_720.mp4";
+                    this.videoPath.p_1080 = filename.substring(0, filename.indexOf("_")) + "_1080.mp4";
+                    video.volume = 0.5;
+
+
+                    //var supposedCurrentTime = 0;
+                    video.addEventListener('timeupdate', function () {
+                        if (!video.seeking) {
+                            supposedCurrentTime = video.currentTime;
+
+                        }
+
+
+                    });
+                    // prevent user from seeking
+                    video.addEventListener('seeking', function () {
+                        // guard agains infinite recursion:
+                        // user seeks, seeking is fired, currentTime is modified, seeking is fired, current time is modified, ....
+                        var seek_back = 0;
+                        var seek_forward = 0;
+                        if (video.currentTime > supposedCurrentTime) {
+                            video.currentTime = supposedCurrentTime
+                            seek_back = video.currentTime;
+                        }
+                        if (seek_back > supposedCurrentTime) {
+                            video.currentTime = supposedCurrentTime;
+                        }
+                    });
+                    // delete the following event handler if rewind is not required
+                    video.addEventListener('ended', function () {
+                        // reset state in order to allow for rewind
+                        supposedCurrentTime = 0;
+                    });
+                    video.load();
+                    video.play();
+                },
+                Skip_Sec() {
+                    var video = document.getElementById("Video_");
+                    var duration = video.duration;
+                    var currentTime = video.currentTime;
+                    console.log("duration " + duration);
+                    console.log("currentTime " + currentTime);
+                    video.currentTime = currentTime;
+                }, GetExam() {
+                    $dtl.get(trueUtl + "Student/ExamRead?course_id=3018", d => {
+
+                        //$alert('Success', 'Success', 'success');
+                        this.examData = d.data.data;
+
+                    }, () => {
+
+                    });
+                }, sendExam() {
+
+                    var data = [];
+                    for (var i = 0; i < this.examData.length; i++) {
+                        var examData = this.examData[i];
+                        for (var j = 0; j < examData.detail.length; j++) {
+                            var answerData = examData.detail[j];
+                            if (answerData.student_answer == "Y") {
+                                var d = {
+                                    course_exam_id: examData.exam_id,
+                                    course_id: examData.course_id,
+                                    student_id: 5,
+                                    is_pretest: 0,
+                                    course_exam_answer_id: answerData.order
+                                }
+                                data.push(d);
+
+                            }
+
+                        }
+                    }
+
+                    $dtl.post(data, `Student/ExamAnswer`, d => {
+
+
+                        //console.log($dtl.cookies.get("Set-Cookie"));
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+
+                        }
+                        else {
+                            //$alert('Success', 'Success', 'success');
+                            //let xhr = new window.XMLHttpRequest();
+                            //xhr.getResponseHeader('Set-Cookie');
+
+
+                        }
+                    }, () => {
+
+                    });
+
+                },
+                ClearInput() {
+                    this.RegisterData = {};
+                },
+                Register() {
+                    this.RegisterData.role_id = parseInt(this.RegisterData.role_id);
+                    var group_depart = [];
+                    for (var i = 0; i < this.departmentData.length; i++) {
+                        var x = this.departmentData[i];
+                        x.depart_id = x.id;
+                    }
+                    group_depart = $linq(this.departmentData).where(x => x.status == 'Y').toArray();
+                    console.log(JSON.stringify(group_depart));
+                    var data = {
+                        user: this.RegisterData,
+                        menu_permission: this.admin_menu,
+                        group_department: group_depart,
+                        token: this.token
+                    }
+                    if (this.RegisterData.password == this.RegisterData.confirm_password) {
+                        $dtl.post(data, `Authentication/RegisterAdmin`, d => {
+
+
+                            //console.log($dtl.cookies.get("Set-Cookie"));
+                            if (!d.success) {
+                                $alert('Error', d.error, 'danger');
+
+                            }
+                            else {
+                                $alert('Success', 'Success', 'success');
+                                this.AdminList();
+                                //$('[href="#home"]').tab('show');
+                                this.RegisterData = {};
+                                this.select_type = "1";
+                                this.search_text = "";
+                                this.department = "";
+                                this.GetMenu();
+                                //this.menu_permission = [{ menu_id: "1001", menu_name: "ภาพรวมของผู้เรียน", status: "N" }, { menu_id: "1002", menu_name: "จัดการคอร์ส", status: "N" }, { menu_id: "1003", menu_name: "จัดการ", status: "N" }, { menu_id: "1004", menu_name: "อื่นๆ", status: "N" }];
+                                //let xhr = new window.XMLHttpRequest();
+                                //xhr.getResponseHeader('Set-Cookie');
+
+                                //this.token = d.token;
+
+                            }
+                        }, () => {
+
+                        });
+                    } else {
+                        $alert('Error', "รหัสผ่านไม่ตรงกัน กรุณาแก้ไขใหม่อีกครั้ง", 'danger');
+
+                    }
+
+
+                },
+
+                searchType() {
+                    var d = [];
+                    this.adminData = this.dataRetrieve;
+
+                    if (this.select_type != "") {
+
+                        this.adminData = $linq(this.dataRetrieve).where(a => a.role_id == this.select_type).toArray();
+                        if (this.select_type == "2") {
+                            this.warning_text = "User นักเรียนไม่สามารถกำหนด สิทธิ นี้ได้";
+                            this.adminData = $linq(this.dataRetrieve).where(a => a.role_id == this.select_type && a.email.includes("dpim.go.th")).toArray();
+                            for (var i = 0; i < this.departmentData.length; i++) {
+                                var x = this.departmentData[i];
+                                x.disabled = true;
+                            }
+
+                            for (var i = 0; i < this.admin_menu.length; i++) {
+                                var x = this.admin_menu[i];
+                                x.disabled = true;
+                            }
+                        } else {
+                            this.warning_text = "";
+                            for (var i = 0; i < this.departmentData.length; i++) {
+                                var x = this.departmentData[i];
+                                x.disabled = false;
+                            }
+
+                            for (var i = 0; i < this.admin_menu.length; i++) {
+                                var x = this.admin_menu[i];
+                                x.disabled = false;
+                            }
+                        }
+
+                    } else {
+                        this.adminData = this.dataRetrieve;
+                      
+                    }
+                    this.dataSearch = this.adminData;
+                    console.log(JSON.stringify(this.adminData));
+                    console.log(this.department);
+                },
+                SelectDetail(m) {
+                    var d = $linq(this.admin_menu).where(a => a.menu_id.includes(m.menu_id.substring(0, 2)) && a.status == "Y" && a.menu_type == "D").toArray();
+
+                    for (var i = 0; i < this.admin_menu.length; i++) {
+                        var x = this.admin_menu[i];
+                        if (x.menu_id.includes(m.menu_id.substring(0, 2)) && x.menu_type == "H") {
+                            if (d.length > 0) {
+                                x.status = "Y";
+                            } else {
+                                x.status = "N";
+                            }
+                        }
+                    }
+                    this.admin_menu = $linq(this.admin_menu).toArray();
+                    console.log(JSON.stringify(this.admin_menu));
+                },
+                searchDepart() {
+                    var d = [];
+                    this.adminData = $linq(this.dataRetrieve).where(a => a.role_id == this.select_type).toArray();
+
+                    if (this.department != "") {
+                        for (var i = 0; i < this.adminData.length; i++) {
+                            var x = this.adminData[i];
+                            if (x.group_depart != null) {
+                                for (var j = 0; j < x.group_depart.length; j++) {
+                                    var z = x.group_depart[j];
+                                    if (z.depart_id.includes(this.department)) {
+                                        d.push(x);
+                                    }
+                                }
+                            }
+                        }
+                        if (d != null) {
+                            this.adminData = d;
+                        }
+                    } else {
+                        if (this.select_type == "" || this.select_type == "1") {
+                            this.adminData = $linq(this.dataRetrieve).where(a => a.role_id == "1").toArray();
+                        }
+                        if (this.select_type == "2") {
+                            this.adminData = $linq(this.dataRetrieve).where(a => a.role_id == this.select_type && a.email.includes("dpim.go.th")).toArray();
+
+                        }
+                    }
+                    this.dataSearch = this.adminData;
+
+                    console.log(JSON.stringify(this.adminData));
+                    console.log(this.department);
+                },
+                AdminList() {
+                    if (this.token != null) {
+                        $dtl.get(`Authentication/AdminList?role_id=` + this.search.select_type + "&depart_id=" + this.department, d => {
+
+
+                            //console.log($dtl.cookies.get("Set-Cookie"));
+                            if (!d.success) {
+                                $alert('Error', d.error, 'danger');
+
+                            }
+                            else {
+                                this.adminData = $linq(d.data.data).where(a => a.role_id == 1).toArray();
+                                this.studentData = $linq(d.student.data).toArray();
+                                this.studentRetrieve = d.student.data;
+
+                                this.dataSearch = this.adminData;
+                                this.dataRetrieve = d.data.data;
+
+                                //let xhr = new window.XMLHttpRequest();
+                                //xhr.getResponseHeader('Set-Cookie');
+
+                                //this.token = d.token;
+
+                            }
+                        }, () => {
+
+                        });
+                    }
+                },
+                selectStudent(x, e) {
+
+                    $("#studentData").on('click', 'tbody tr', function () {
+                        $("#studentData tbody tr").removeClass('active');
+
+                        if ($(this).hasClass('active')) {
+                            $(this).removeClass('active');
+
+                        } else {
+                            $(this).addClass('active');
+                        }
+
+                    });
+
+                    this.student_id = x.user_id;
+                    if (x.manage_profile != null) {
+                        this.manage_profile = x.manage_profile;
+                    }
+                    this.manageData = x;
+
+                    //for (var i = 0; i < this.manage_profile.length; i++) {
+                    //    var a = this.manage_profile[i];
+                    //    for (var j = 0; j < x.manage_profile.length; j++) {
+                    //        var b = x.manage_profile[j];
+                    //        if (a.desc == b.desc) {
+                    //            a.status = b.status;
+                    //        }
+                    //    }
+                    //}
+                    //console.log(JSON.stringify(x));
+                },
+                SearchStudent() {
+                    var retrieve = this.studentData;
+                    var d = this.studentData;
+                    if (this.student_search == "" || this.student_search == " ") {
+                        this.student_search = null;
+                    }
+                    if (this.student_search != null) {
+                        this.studentData = $linq(this.studentData).where(a => a.email.includes(this.student_search) || a.firstname.includes(this.student_search) || a.lastname.includes(this.student_search)).toArray();
+                    } else {
+                        this.studentData = this.studentRetrieve;
+                    }
+                },
+                updateEditProfile() {
+                    var d = {
+                        user_manage_profile: this.manage_profile,
+                        user_id: this.student_id
+                    }; $dtl.post(d, `Authentication/UpdateEditProfile`, d => {
+
+
+                        //console.log($dtl.cookies.get("Set-Cookie"));
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+
+                        }
+                        else {
+                            $("#studentData tbody tr").on('click', function () {
+                                $("#studentData tbody tr").removeClass('active');
+                            });
+                            $alert('Success', 'Success', 'success');
+                            for (var i = 0; i < this.manage_profile.length; i++) {
+                                var x = this.manage_profile[i];
+                                x.status = "N";
+                            }
+                            this.AdminList();
+                            //this.menu_permission = [{ menu_id: "1001", menu_name: "ภาพรวมของผู้เรียน", status: "N" }, { menu_id: "1002", menu_name: "จัดการคอร์ส", status: "N" }, { menu_id: "1003", menu_name: "จัดการ", status: "N" }, { menu_id: "1004", menu_name: "อื่นๆ", status: "N" }];
+                            //let xhr = new window.XMLHttpRequest();
+                            //xhr.getResponseHeader('Set-Cookie');
+
+                            //this.token = d.token;
+
+                        }
+                    }, () => {
+
+                    });
+                },
+                searchData(x) {
+                    if (this.search_text == "" || this.search_text == " ") {
+                        this.search_text = null;
+                    }
+                    if (this.search_text != null) {
+                        this.adminData = $linq(this.adminData).where(a => a.username.includes(this.search_text) || a.email.includes(this.search_text)).toArray();
+                    } else {
+                        this.adminData = this.dataSearch;
+                    }
+                    console.log(JSON.stringify(this.adminData));
+                    console.log(this.search_text);
+                },
+                AdminSelect(x) {
+                    //$('[href="#profile"]').tab('show');
+                    x.confirm_password = x.password;
+                    //this.menu_permission = [{ menu_id: "1001", menu_name: "ภาพรวมของผู้เรียน", status: "N" }, { menu_id: "1002", menu_name: "จัดการคอร์ส", status: "N" }, { menu_id: "1003", menu_name: "จัดการ", status: "N" }, { menu_id: "1004", menu_name: "อื่นๆ", status: "N" }];
+                    //this.GetMenu();
+
+
+                    $("#adminDataList").on('click', 'tbody tr', function () {
+                        $("#adminDataList tbody tr").removeClass('active');
+
+                        if ($(this).hasClass('active')) {
+                            $(this).removeClass('active');
+
+                        } else {
+                            $(this).addClass('active');
+                        }
+
+                    });
+
+                    for (var j = 0; j < this.admin_menu.length; j++) {
+                        var z = this.admin_menu[j];
+                        z.status = "";
+                        if (x.menu_permission.length > 0) {
+                            for (var i = 0; i < x.menu_permission.length; i++) {
+                                var a = x.menu_permission[i];
+                                if (a.status != "Y") {
+                                    a.status = "N";
+                                }
+                                if (z.menu_id == a.menu_id) {
+                                    z.status = a.status;
+                                }
+                            };
+                        }
+                    }
+                    for (var j = 0; j < this.departmentData.length; j++) {
+                        var z = this.departmentData[j];
+                        z.status = "";
+                        if (x.group_depart.length > 0) {
+                            for (var i = 0; i < x.group_depart.length; i++) {
+                                var a = x.group_depart[i];
+                                if (a.status != "Y") {
+                                    a.status = "N";
+                                }
+                                if (z.id == a.depart_id) {
+                                    z.status = a.status;
+                                }
+                            };
+                        }
+                    }
+                    //console.log(JSON.stringify(this.departmentData));
+                    //x.retrieve = 'Y';
+                    this.RegisterData = x;
+                    //this.departmentData = x.group_department;
+                    this.RegisterData.retrieve = true;
+                },
+                AuthenLogin() {
+                    $dtl.post(this.authData, `Authentication/Login`, d => {
+
+
+                        //console.log($dtl.cookies.get("Set-Cookie"));
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+
+                        }
+                        else {
+                            //$alert('Success', 'Success', 'success');
+                            this.token = d.token;
+                            $("#LoginPanel").hide();
+                            $("#adminDataList").show();
+                            $("#tab_profile").show();
+                            this.AdminList();
+
+
+                            //let xhr = new window.XMLHttpRequest();
+                            //xhr.getResponseHeader('Set-Cookie');
+
+                            //this.token = d.token;
+
+                        }
+                    }, () => {
+
+                    });
+                },
+                AuthenLogin() {
+                    $dtl.get(`Authentication/AuthenLogin`, d => {
+                        this.authData = d.auth;
+                        console.log(JSON.stringify(d.auth));
+                        //console.log($dtl.cookies.get("Set-Cookie"));
+
+                    }, () => {
+
+                    });
+                },
+                Checkauth() {
+                    this.superadmin_permission = 'Y';
+                    //var data = {
+                    //    token: this.RegisterData.password,
+                    //    token_admin: this.token
+                    //}
+                    //$dtl.post(data, `Authentication/CheckAuthen`, d => {
+
+
+                    //    //console.log($dtl.cookies.get("Set-Cookie"));
+
+                    //    this.token = d.token;
+                    //    this.RegisterData.password = d.password;
+                    //    $("#LoginPanel").hide();
+                    //    $("#adminDataList").show();
+                    //    $("#tab_profile").show();
+                    //    this.AdminList();
+
+
+                    //    //let xhr = new window.XMLHttpRequest();
+                    //    //xhr.getResponseHeader('Set-Cookie');
+
+                    //    //this.token = d.token;
+
+
+                    //}, () => {
+
+                    //});
+                },
+                checkValue() {
+                    console.log(JSON.stringify(this.departmentData));
+                },
+                GetMenu() {
+
+                    $dtl.get(`Authentication/GetMenu`, d => {
+
+
+                        //console.log($dtl.cookies.get("Set-Cookie"));
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+
+                        }
+                        else {
+                            //$alert('Success', 'Success', 'success');
+
+                            this.admin_menu = d.data.data;
+
+                            for (var i = 0; i <= this.admin_menu.length; i++) {
+                                var x = this.admin_menu[i];
+                                x.status = "N";
+                            }
+                            //let xhr = new window.XMLHttpRequest();
+                            //xhr.getResponseHeader('Set-Cookie');
+
+                            //this.token = d.token;
+
+                        }
+                    }, () => {
+
+                    });
+                }, GetDepartment() {
+                    $dtl.get(`Authentication/GetDepartment`, d => {
+
+
+                        //console.log($dtl.cookies.get("Set-Cookie"));
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+
+                        }
+                        else {
+                            //$alert('Success', 'Success', 'success');
+                            this.departmentData = d.data.data;
+
+
+                            //let xhr = new window.XMLHttpRequest();
+                            //xhr.getResponseHeader('Set-Cookie');
+
+                            //this.token = d.token;
+
+                        }
+                    }, () => {
+
+                    });
+                },
+                SelectHeader(m) {
+                  
+                    for (var i = 0; i < this.admin_menu.length; i++) {
+
+                        var x = this.admin_menu[i];
+
+
+                       
+                        if (x.menu_id.includes(m.menu_id.substring(0, 2)) && x.menu_id != m.menu_id) {
+
+                            x.status = m.status;
+                        }
+
+                    }
+                    this.admin_menu = $linq(this.admin_menu).toArray();
+                    console.log(JSON.stringify(m.status));
+         
+            },
+                menuSave() {
+                    if (this.menuData.menu_type == "H") {
+                        var s = $linq(this.admin_menu).where(x => x.menu_type == "H").toArray();
+                        this.menuData.menu_id = s.length + 1 + "000";
+                        //console.log(this.menuData.menu_id);
+
+                    } else {
+                        var s = $linq(this.admin_menu).where(x => x.menu_type == 'D' && x.menu_id.includes(this.menuData.menu_header)).toArray();
+                        var a = (s.length < 10) ? "0" + (s.length + 1) : s.length + 1;
+                        this.menuData.menu_id = this.menuData.menu_header + a;
+                    }
+                    $dtl.post(this.menuData, `Authentication/CreateNewMenu`, d => {
+
+
+                        //console.log($dtl.cookies.get("Set-Cookie"));
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+
+                        }
+                        else {
+                            $alert('Success', 'Success', 'success');
+                            //this.admin_menu = d.data.data;
+                            this.GetMenu();
+                            this.menuData = { menu_type: "", menu_header: null };
+                            this.menuShow = false;
+                            //let xhr = new window.XMLHttpRequest();
+                            //xhr.getResponseHeader('Set-Cookie');
+
+                            //this.token = d.token;
+
+                        }
+                    }, () => {
+
+                    });
+                }, tabselect() {                     this.$refs.search_student.focus();
+            },
+                menuDelete() {
+
+
+                    $confirm("ต้องการลบข้อมูลนี้ใช่หรือไม่", () => {
+                        $dtl.post(this.menuData, `Authentication/DeleteMenu`, d => {
+
+
+                            //console.log($dtl.cookies.get("Set-Cookie"));
+                            if (!d.success) {
+                                $alert('Error', d.error, 'danger');
+
+                            }
+                            else {
+                                $alert('Success', 'Success', 'success');
+                                //this.admin_menu = d.data.data;
+                                this.GetMenu();
+                                this.menuData = { menu_type: "", menu_header: null };
+
+                                this.menuShow = false;
+                                //let xhr = new window.XMLHttpRequest();
+                                //xhr.getResponseHeader('Set-Cookie');
+
+                                //this.token = d.token;
+
+                            }
+                        }, () => {
+
+                        })
+                    });
+                },
+                menuDel() {
+                    $dtl.post(this.menuData, `Authentication/DeleteMenu`, d => {
+
+
+                        //console.log($dtl.cookies.get("Set-Cookie"));
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+
+                        }
+                        else {
+                            $alert('Success', 'Success', 'success');
+                            //this.admin_menu = d.data.data;
+                            this.GetMenu();
+                            this.menuData = {};
+                            this.menuShow = false;
+                            //let xhr = new window.XMLHttpRequest();
+                            //xhr.getResponseHeader('Set-Cookie');
+
+                            //this.token = d.token;
+
+                        }
+                    }, () => {
+
+                    })
+
+                }, menuNew() {
+                    var x = $linq(this.admin_menu).where(a => a.menu_id == this.menuData.menu_id).firstOrDefault();
+                    if (x.status == 'Y') {
+                        x.status = 'N';
+                    } else {
+                        x.status = 'Y';
+                    }
+                    this.menuData = { menu_type: "", menu_header: null };
+
+                    this.deleteBtn = false;
+                }
+                //GenerateCertificate() {
+                //    $dtl.get(trueUtl + trueUrl+"File/ExamdownloadTemp", d => {
+                //        if (!d.success) {
+                //            $alert('Error', d.error, 'danger');
+
+                //        } else {
+                //                                        $alert('Success', 'Success', 'success');
+
+                //        }
+
+
+                //    }, () => {
+
+                //    });
+                //}
+                ////LoadFile() {
+                //    var filename = '20201129033350_593912.mp4';
+                //    this.videoPath = { src: "http://192.168.2.121/DpimProjectV2/File/StreamVDO?filename=20201201085308348363\20201201085308348363_original.mp4.mp4" + filename };
+                //}
+
+            },
+            mounted() {
+
+                const queryString = window.location.search;
+                const urlParams = new URLSearchParams(queryString);
+                this.param = {
+                    subject_id: urlParams.get('subject_id')
+                };
+                this.AuthenLogin();
+                //this.getVideo();
+                this.AdminList();
+                this.GetMenu();
+            
+             
+                this.GetDepartment();
+                this.select_type = "1";
+                this.$refs.text_search.focus();
+                //if (this.permission == "mine") {
+                //    this.superadmin_permission = "Y";
+                //}
+            },
+
+        });
+    </script>
+    <script>
+        var defaultWidth = 400;
+        var defaultHeight = 100;
+        var signaturePad;
+
+        var clientIP = '';
+        $.getJSON('//api.ipify.org?format=jsonp&callback=?', function (data) {
+            clientIP = data.ip;
+            console.log(clientIP);
+        });
+
+        $(document).ready(function () {
+            signaturePad = new SignaturePad(document.getElementById('signature-pad'), {
+                backgroundColor: 'rgba(255, 255, 255, 0)',
+                penColor: 'rgb(0, 0, 0)'
+            });
+            if (window.innerWidth < (defaultWidth + 50)) {
+                console.log("resize");
+                //calc newWidth
+                var nw = window.innerWidth - (20 * 2);
+                var nr = nw / defaultWidth;
+                //calc newHeight
+                var nh = defaultHeight * nr;
+                //change sig pad
+                $("#myCanvasSignature").attr('width', nw);
+                $("#myCanvasSignature").attr('height', nh);
+                //change new sig pad
+                $("#signature-pad").attr('width', nw);
+                $("#signature-pad").attr('height', nh);
+                //change as dig sig pads
+                var sigs = document.getElementsByClassName('dig-sig');
+                $(sigs).each(function (i, s) {
+                    $(s).attr('width', nw);
+                    $(s).attr('height', nh);
+                });
+            }
+
+            //check if default sig is the text or the image.
+            var defaultSignature = $("#UserName").val();
+            console.log(defaultSignature);
+            //establish ctx center
+            //save signature value to png
+            var ctx = document.getElementById('myCanvasSignature').getContext('2d');
+            var cy = (ctx.canvas.height);
+            var cx = (ctx.canvas.width);
+            ctx.font = '40px \'Pacifico\', cursive';
+            ctx.fillStyle = '#222222';
+            ctx.textBaseline = 'center';
+            ctx.textAlign = "center";
+            ctx.fillText(defaultSignature, cx / 2, cy / 2 + 15);
+
+            //Pop acknoledge disclaimer
+            Acknowledge();
+        });
+
+        function Acknowledge() {
+            $("#dialog").dialog({
+                resizable: false,
+                height: 375,
+                width: defaultWidth + 50,
+                modal: true,
+                show: {
+                    duration: 200
+                },
+                hide: {
+                    duration: 100
+                },
+                buttons: {
+                    "Change": function () {
+                        $("#Signature").attr("acknowledged-data", 'false');
+
+                        $(this).dialog("close");
+                        Change();
+                    },
+                    "Accept": function () {
+                        $("#myCanvasSignature").attr("acknowledged-data", 'true');
+                        $(this).dialog("close");
+                        //And send to Database as Activity Log
+                        var d = new Date();
+                        var log = "Signature (" + $("#Signature").val() +
+                            ") was accepted by IP " + clientIP + " at " + d.toDateString() + " " + d.toLocaleTimeString() + "<br/>";
+                        console.log(log);
+                        $('.log-file').html($('.log-file').html() + log);
+                    },
+                    "Decline": function () {
+                        $("#Signature").attr("acknowledged-data", 'false');
+                        $(this).dialog("close");
+                    }
+                }
+            });
+        }
+
+        function Signature(x) {
+            if (($("#myCanvasSignature").attr("acknowledged-data") == "false")) {
+                Acknowledge();
+            }
+            else {
+                var SignatureItem = document.getElementById('Sig-' + x);
+                if ($(SignatureItem).attr("signed-data") == "false") {
+                    //$(".dig-sig[sig-id-data='" + x + "']").text(s);
+                    var ctx = document.getElementById('myCanvasSignature').getContext('2d');
+                    //ctx.canvas.width  = (ctx.canvas.width * 0.5);
+                    //ctx.canvas.height = (ctx.canvas.height * 0.5);
+                    console.log(ctx.canvas.width);
+                    var i = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    //console.log(i);
+                    $(SignatureItem).attr("signed-data", "true");
+                    var sigctx = SignatureItem.getContext('2d');
+                    sigctx.putImageData(i, 0, 0);//, sigctx.canvas.width, sigctx.canvas.height, 0,0,ctx.canvas.width*0.5, ctx.canvas.height*0.5);
+                    //clientIP = data.ip;
+                    //console.log(data.ip);
+                    var d = new Date();
+                    var log = "Signature (" + $("#Signature").val() +
+                        ") was signed in signature (" + x + ") by IP " + clientIP + " at " + d.toDateString() + " " + d.toLocaleTimeString() + "<br/>";
+                    console.log(log);
+                    $('.log-file').html($('.log-file').html() + log);
+                }
+            }
+        }
+
+        function Change() {
+            $("#change-sig").dialog({
+                resizable: false,
+                height: 320,
+                width: defaultWidth + 50,
+                modal: true,
+                show: {
+                    duration: 200
+                },
+                hide: {
+                    duration: 100
+                },
+                buttons: {
+                    "Clear": function () {
+                        signaturePad.clear();
+                    },
+                    "Accept": function () {
+                        //Save Sig
+                        var octx = document.getElementById('signature-pad').getContext('2d');
+                        var d1 = octx.getImageData(0, 0, octx.canvas.width, octx.canvas.height);
+                        var ctx = document.getElementById('myCanvasSignature').getContext('2d');
+                        ctx.putImageData(d1, 0, 0);
+                        //We are good. Close this dialog and open the acknowledge again
+                        $(this).dialog("close");
+                        Acknowledge();
+                        //And send to Database as Activity Log
+                    },
+                    Cancel: function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+        }
+    </script>
+    <script>
+        const container = document.getElementById('ReactDemo')
+        const url = 'https://www.youtube.com/watch?v=d46Azg3Pm4c'
+
+        renderReactPlayer(container, { url, playing: false,loop:true })
+
+        function pausePlayer() {
+            renderReactPlayer(container, { url, playing: false })
+        }
+    </script>
+    }

@@ -1,0 +1,98 @@
+﻿TWBSColor TWBSColor Generate your own Bootstrap navbar Select your Bootstrap version You would like a specific version? Ask me on Twitter! Select your colors Default background Active background Default color Active color Colorize dropdown Bookmark your permalink https://work.smarchal.com/twbscolor/3.3.7/css/ffffffededed4646460000000 Include Bootstrap assets //maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css //maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js Copy the generated SCSS/SASS/LESS/CSS SCSS SASS LESS CSS .navbar-default {
+    background-color: #ffffff;
+    border-color: #ededed;
+}
+
+.navbar-default .navbar-brand {
+    color: #464646;
+}
+
+    .navbar-default .navbar-brand:hover,
+    .navbar-default .navbar-brand:focus {
+        color: #000000;
+    }
+
+.navbar-default .navbar-text {
+    color: #464646;
+}
+
+.navbar-default .navbar-nav > li > a {
+    color: #464646;
+}
+
+    .navbar-default .navbar-nav > li > a:hover,
+    .navbar-default .navbar-nav > li > a:focus {
+        color: #000000;
+    }
+
+.navbar-default .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .active > a:hover,
+.navbar-default .navbar-nav > .active > a:focus {
+    color: #000000;
+    background-color: #ededed;
+}
+
+.navbar-default .navbar-nav > .open > a,
+.navbar-default .navbar-nav > .open > a:hover,
+.navbar-default .navbar-nav > .open > a:focus {
+    color: #000000;
+    background-color: #ededed;
+}
+
+.navbar-default .navbar-toggle {
+    border-color: #ededed;
+}
+
+    .navbar-default .navbar-toggle:hover,
+    .navbar-default .navbar-toggle:focus {
+        background-color: #ededed;
+    }
+
+    .navbar-default .navbar-toggle .icon-bar {
+        background-color: #464646;
+    }
+
+.navbar-default .navbar-collapse,
+.navbar-default .navbar-form {
+    border-color: #464646;
+}
+
+.navbar-default .navbar-link {
+    color: #464646;
+}
+
+    .navbar-default .navbar-link:hover {
+        color: #000000;
+    }
+
+@media (max-width: 767px) {
+    .navbar-default .navbar-nav .open .dropdown-menu > li > a {
+        color: #464646;
+    }
+
+        .navbar-default .navbar-nav .open .dropdown-menu > li > a:hover,
+        .navbar-default .navbar-nav .open .dropdown-menu > li > a:focus {
+            color: #000000;
+        }
+
+    .navbar-default .navbar-nav .open .dropdown-menu > .active > a,
+    .navbar-default .navbar-nav .open .dropdown-menu > .active > a:hover,
+    .navbar-default .navbar-nav .open .dropdown-menu > .active > a:focus {
+        color: #000000;
+        background-color: #ededed;
+    }
+}
+
+.table-rpt {
+    border: 1px solid #000000;
+    border-collapse:collapse !important;
+}
+
+    .table-rpt td, .table-rpt th {
+        border: 1px solid #000000;
+        border-color:#000 !important;
+    }
+
+    .table-rpt th {
+        text-align:center
+    }

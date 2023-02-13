@@ -1,0 +1,22 @@
+﻿<script>
+        $(document).ready(function () {
+            $('body').fadeIn(500);
+            $('[data-toggle="popover"]').popover();
+            $('[data-toggle="tooltip"]').tooltip();
+            $("tr").click(function () {
+                $(this).closest("tr").siblings().removeClass("highlighted");
+                $(this).toggleClass("highlighted");
+            })
+
+            //setInterval(function () {
+            //    if (!vueFooter.sessionsMax) {
+            //        $notify.error('ไม่สามรถเชื่อมต่อ Websocket ได้ จะทำให้บาง Function ในโปรแกรมนี้ไม่ทำงาน โปรดแจ้งผู้ดูแลระบบ');
+            //    }
+            //}, 30000);
+        });
+</script>
+<style>
+    body {
+        padding-right: 0 !important;
+    }
+</style>

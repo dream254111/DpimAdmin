@@ -1,0 +1,189 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+    Layout = "~/Views/Shared/_MainLayoutAdmin.cshtml";
+}
+
+<div id="vue-app" style="margin-top:50px;">
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Admin List</a></li>
+        <li role="presentation"><a href="@Url.Content("~/Home/AdminManage")" aria-controls="profile" role="tab" data-toggle="tab" id="tab_profile">Register Admin</a></li>
+
+        <li role="presentation"><a href="@Url.Content("~/Setting/UpdateStructure")">Update Structure</a></li>
+        @*<li role="presentation"><a href="#login" aria-controls="admin" role="tab" data-toggle="tab">Login</a></li>*@
+
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="home">
+            <table class="table table-hover table-bordered" id="adminDataList">
+                <thead>
+                    <tr>
+                        <th align="center">No</th>
+                        <th align="center">Subject</th>
+                        <th align="center">Name</th>
+                        <th align="center">To Email</th>
+                        <th align="center">Course Name</th>
+                        <th align="center">Send Date</th>
+                        <th align="center"> Send Again</th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    <tr v-for="(x,idx) in emailData" v-on:click="AdminSelect(x)">
+                        <td align="center">{{x.email_id}}</td>
+                        <td>{{x.subject}}</td>
+                        <td>{{x.firstname}} {{x.lastname}}</td>
+                        <td>{{x.email}}</td>
+                        <td>{{x.course_name}}</td>
+                        <td>{{x.send_dt}}</td>
+                        <td><button class="btn btn-primary btn-xs" v-on:click="SendEmail(x)">Send Again</button> </td>
+                    </tr>
+                </tbody>
+            </table>
+            <button class="btn btn-success btn-xs pull-right" style="margin-top:20px;" v-on:click="Checkauth()">CheckAuth</button>
+
+
+        </div>
+
+
+    
+      
+    </div>
+</div>
+
+
+@section scripts{
+    <script>
+      
+        $('#timeline').css("height", ($(window).height()));
+        let vue = new Vue({
+            el: '#vue-app',
+            data: {
+                postback_dataProject: {},
+                postback_dataRetrieveDocument: {},
+                showModal: false,
+                data: {},
+                dataMaincom: [],
+                //trueUrl: trueUtl,
+                subject: {},
+                topicData: {},
+                header: [],
+                sbj_header: {},
+                detail: [],
+                message: "",
+                bc: {},
+                param: {},
+                listImg: [],
+                fileData: {},
+                videoPath: {},
+                videoList: [],
+                token: token,
+                type: [
+                    {
+                        type_upload: "video",
+                        type_name: "Video"
+                    }, {
+                        type_upload: "exam",
+                        type_name: "Exam"
+                    }, {
+                        type_upload: "files",
+                        type_name: "Multiple"
+                    }, {
+                        type_upload: "file",
+                        type_name: "Single"
+                    },
+                ],
+                download: '',
+                examData: [],
+                RegisterData: {},
+                adminData: [],
+                authData: {},
+                password: "",
+                emailData:[]
+            },
+            methods: {
+ 
+                EmailList() {
+                  
+                        $dtl.get(`Management/EmailList`, d => {
+
+
+                            //console.log($dtl.cookies.get("Set-Cookie"));
+                            if (!d.success) {
+                                $alert('Error', d.error, 'danger');
+
+                            }
+                            else {
+                                this.emailData = d.data.data;
+
+                                //let xhr = new window.XMLHttpRequest();
+                                //xhr.getResponseHeader('Set-Cookie');
+
+                                //this.token = d.token;
+
+                            }
+                        }, () => {
+
+                        });
+                    
+                },
+                SendEmail(x) {
+                    var baseUrl = "https://dpimacademy-apis.dpim.go.th/";
+                    var baseUrl1 = "https://dpimproject.ddns.net/DpimprojectV2/";
+                    $dtl.get(baseUrl1+"Management/SendingEmail?student_id="+x.student_id+"&course_id="+x.course_id+"&email_type="+x.email_type, d => {
+
+
+                        //console.log($dtl.cookies.get("Set-Cookie"));
+                        if (!d.success) {
+                            $alert('Error', d.error, 'danger');
+
+                        }
+                        else {
+                            $alert('Success', "Email Send Success", 'success');
+                            this.EmailList();
+                            //let xhr = new window.XMLHttpRequest();
+                            //xhr.getResponseHeader('Set-Cookie');
+
+                            //this.token = d.token;
+
+                        }
+                    }, () => {
+
+                    });
+                }
+           
+                //GenerateCertificate() {
+                //    $dtl.get(trueUtl + trueUrl+"File/ExamdownloadTemp", d => {
+                //        if (!d.success) {
+                //            $alert('Error', d.error, 'danger');
+
+                //        } else {
+                //                                        $alert('Success', 'Success', 'success');
+
+                //        }
+
+
+                //    }, () => {
+
+                //    });
+                //}
+                ////LoadFile() {
+                //    var filename = '20201129033350_593912.mp4';
+                //    this.videoPath = { src: "http://192.168.2.121/DpimProjectV2/File/StreamVDO?filename=20201201085308348363\20201201085308348363_original.mp4.mp4" + filename };
+                //}
+
+            },
+            mounted() {
+
+                const queryString = window.location.search;
+                const urlParams = new URLSearchParams(queryString);
+                this.param = {
+                    subject_id: urlParams.get('subject_id')
+                };
+                this.EmailList();
+            },
+
+        });
+    </script>
+}

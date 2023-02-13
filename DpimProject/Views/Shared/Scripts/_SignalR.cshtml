@@ -1,0 +1,107 @@
+﻿<script>
+    const reHub = SJ.iwc.SignalR.getHubProxy('authHub', {
+        client: {
+            displayMsg: function (msg) {
+                console.log(msg);
+            },
+            welcomeMessage: function (text) {
+                console.log(text);
+            },
+            logout: function () {
+                window.location = '@Url.Content("~/AuthenticationApi/Logout")';
+            },
+            displaySessionOn: function (sessionsOn, sessionsMax) {
+                vueFooter.sessionsOn = sessionsOn;
+                vueFooter.sessionsMax = sessionsMax;
+                vueFooter.$nextTick();
+            }
+        }
+    });
+
+    @*$.connection.hub.qs = { 'session_id': '' + encodeURIComponent('@(Request.Cookies["mg_re_session_ref"]?.Value ?? "")') };*@
+
+    let signalrObj = {
+        check_session_loop: null,
+        check_state_loop: null,
+        start: function (fn) {
+            SJ.iwc.SignalR.start().done(function () {
+                console.log('started');
+                if (fn) {
+                    fn();
+                }
+            });
+        },
+        check_session: function (fn) {
+            reHub.server.userOnlineStatus($$cookies.get('mg_erp_auth') || '', document.title, navigator.userAgent).done(function () {
+                if (fn) {
+                    fn();
+                }
+            });
+            console.log('session checked in ' + new Date());
+        },
+        check_notifi: function () {
+            //reHub.server.notificationCheck();
+        }
+    };
+    SJ.iwc.SignalR.on('connected', function () {
+        console.log('connected owned ' + SJ.iwc.SignalR.isConnectionOwner());
+        if (SJ.iwc.SignalR.isConnectionOwner()) {
+            signalrObj.check_session(function () {
+                //signalrObj.check_notifi();
+            });
+        }
+        if (!signalrObj.check_session_loop && SJ.iwc.SignalR.isConnectionOwner()) {
+            console.log('start sync this connection')
+            signalrObj.check_session_loop = setInterval(function () { signalrObj.check_session() }, 60000);
+        } else {
+            if (signalrObj.check_session_loop) {
+                clearInterval(signalrObj.check_session_loop);
+            }
+            signalrObj.check_session_loop = null;
+        }
+    });
+    SJ.iwc.SignalR.on('disconnected', function () {
+        console.log('disconnected')
+        if (signalrObj.check_session_loop) {
+            clearInterval(signalrObj.check_session_loop);
+            signalrObj.check_session_loop = null;
+            // console.log('end sync this connection')
+        }
+        if (SJ.iwc.SignalR.isConnectionOwner()) {
+            if (!signalrObj.check_state_loop) {
+                signalrObj.check_state_loop = setInterval(function () {
+                    if (SJ.iwc.SignalR.getState() == 4) {
+                        console.log('try to connect again')
+                        signalrObj.start();
+                    } else {
+                        clearInterval(signalrObj.check_state_loop);
+                        signalrObj.check_state_loop = null;
+                        console.log('clear reconnect')
+                    }
+                }, 30000)
+            }
+        } else {
+            if (signalrObj.check_state_loop) {
+                clearInterval(signalrObj.check_state_loop);
+                signalrObj.check_state_loop = null;
+                console.log('clear reconnect')
+            }
+        }
+    });
+
+    $(document).ready(function () {
+        signalrObj.start(function () {
+            if (!SJ.iwc.SignalR.isConnectionOwner()) {
+                signalrObj.check_session(function () {
+                    //signalrObj.check_notifi();
+                });
+            }
+        });
+    });
+
+    $(function () {
+        @*$.get('@Url.Content("~/")' + 'Authentication/UserLogUpdate?menu_item=' + '@ViewContext.RouteData.Values["action"]'.substring(0, 40) + "&desc=" + encodeURIComponent(document.title)).then(function (response) {
+
+        });*@
+    });
+</script>

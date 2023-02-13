@@ -1,0 +1,58 @@
+﻿<script type="text/x-template" id="vue-component-template-fileupload">
+
+        <input type="file"  v-on:input="getFileData()" v-on:change="handleFilesUpload()">
+
+</script>
+<script>
+    Vue.component('fileupload', {
+        template: `#vue-component-template-fileupload`,
+        props: [
+            'value',
+            'disabled',
+            'showtime'
+        ],
+        data: function () {
+            return {
+                test: 'test',
+                formData: [],
+            };
+        },
+        methods: {
+            handleFilesUpload() {
+                var files = this.$el.files;
+                this.formData = [];
+                
+                    this.formData.push(files[0]);
+                console.log(JSON.stringify(files[0]));
+
+                this.$emit('change', this.formData)
+
+                //console.log(this.formData);
+
+                //let formData = new FormData();
+                //for (var i = 0; i < this.files.length; i++) {
+                ////    //    formData.append('files[' + i + ']', file);
+                //    var file = this.files[i];
+                //    var reader = new FileReader();
+                //    reader.onload = function (event) {
+                //       console.log(event.target.result);
+                //    };
+
+                //    /* The readAsText method will read the file's data as a text string. By default the string is decoded as 'UTF-8'. */
+                //    reader.readAsText(file);
+                    
+
+                //}
+                //console.log(JSON.stringify(formData));
+            },
+            getFileData() {
+                this.files = this.$el.files;
+                this.$emit('input', this.files);
+
+            }
+        },
+        mounted() {
+        }
+    });
+</script>
+

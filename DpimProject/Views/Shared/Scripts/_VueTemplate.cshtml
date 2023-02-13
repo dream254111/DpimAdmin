@@ -1,0 +1,112 @@
+﻿<script type="text/x-template" id="tmp_row">
+    <div class="row">
+        <slot></slot>
+    </div>
+</script>
+<script>
+    Vue.component('m-row', {
+        template: '#tmp_row',
+        data() {
+            return {};
+        }
+    });
+</script>
+
+<script type="text/x-template" id="tmp_col">
+    <div v-bind:class="'col-sm-'+sm+' col-lg-'+lg+' col-xs-'+xs">
+        <slot></slot>
+    </div>
+</script>
+<script>
+    Vue.component('m-col', {
+        template: '#tmp_col',
+        props: ['sm', 'lg', 'xs'],
+        data() {
+            return {};
+        }
+    });
+</script>
+
+<script type="text/x-template" id="tmp_modal_select">
+    <button @@click="postback(value)" @@modal-open="">{{ value }}</button>
+</script>
+<script>
+    Vue.component('mg-modal-select', {
+        template: '#tmp_modal_select',
+        props: ['value'],
+        data: function () {
+            return {
+                event_name: this.eventName
+            };
+        },
+        methods: {
+            postback: function (data) {
+                this.$emit('select', data);
+            },
+            modalOpen: function () {
+                alert(this.value);
+            }
+        }
+    });
+</script>
+
+<script type="text/x-template" id="tmp_tab_header">
+    <ul class="nav nav-tabs" role="tablist">
+        <li v-for="t in headerTabsData" v-bind:class="{'active':t.id==selectedTabData}" v-on:click.prevent="tabClick(t.id)">
+            <a v-on:click.prevent="" href="#">
+                <i class="fa" v-bind:class="[{'text-success':t.id==selectedTabData}, 'fa-'+(t.icon||'circle')]"></i>&nbsp;&nbsp;{{t.text}} <span v-if="t.badge" class="badge badge-sm m-l-xs" v-bind:class="[t.badgeClass]">{{t.badge}}</span>
+            </a>
+        </li>
+    </ul>
+</script>
+<script>
+    Vue.component('mg-tab-header', {
+        template: '#tmp_tab_header',
+        props: ['tabData', 'selectedTabData'],
+        data: function () {
+            return {
+                headerTabsData: this.tabData,
+                activeTab: this.selectedTabData
+            };
+        },
+        methods: {
+            showTabMain(tab_name) {
+                return tab_name === this.activeTab
+            },
+            tabClick(tab_name) {
+                this.activeTab = tab_name
+                //for (let i = 0; i < this.headerTabsData.length; i++) {
+                //    let x = this.headerTabsData[i];
+                //    x.active = x.id == this.activeTab;
+                //}
+                this.$emit('tab-change', { tabId: this.activeTab })
+            }
+        },
+        mounted: function () {
+            //this.$emit('tab-change', { tabId: $linq(this.headerTabs).where(x=>x.active).select(x=>x.id).firstOrDefault() || '' })
+        }
+    });
+</script>
+
+<script type="text/x-template" id="tmp_tab_pane">
+    <div class="tab-pane" v-bind:class="{'active':isActive()}"><slot></slot></div>
+</script>
+<script>
+    Vue.component('mg-tab-pane', {
+        template: '#tmp_tab_pane',
+        props: ['id', 'selectedTabData'],
+        data: function () {
+            return {
+
+            };
+        },
+        methods: {
+            isActive() {
+                return this.id === this.selectedTabData
+            }
+        },
+        computed: {
+
+        }
+    });
+</script>

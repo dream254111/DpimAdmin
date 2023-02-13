@@ -1,0 +1,96 @@
+﻿@using DpimProject.Models.DataTools;
+@{
+    /**/
+    Response.AppendHeader("Access-Control-Allow-Origin", "*");
+    var token = HttpContext.Current.Request.Cookies["dpim_auth"]?.Value ?? "";
+
+
+    var baseUrl = $"{Request.Url.Scheme}://{Request.Url.Authority}{Url.Content("~/")}";
+};
+<script>    
+    let token =@Html.Raw(Dtl.json_stringify(token));
+</script>
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dpim Admin Page</title>
+        <link href="~/Content/bootstrap.css" rel="stylesheet" />
+        <link href="~/Content/admin_main.css" rel="stylesheet" />
+        <link href="~/Content/jquery-confirm.css" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" rel="stylesheet">
+        <link href="~/Content/font-awesome.css" rel="stylesheet" />
+        <script src="~/Scripts/modernizr-2.8.3.js"></script>
+        <base href="@(baseUrl)" postback="" />
+
+    </head>
+    <body>
+        <div class="container-fluid content-dpim">
+            @{Html.RenderPartial("~/Views/Shared/_HeaderAdmin.cshtml");}
+
+            <div class="container body-content-dpim">
+                @RenderBody()
+                <hr />
+                <footer>
+                    <p>&copy;Dpim Academy Admin @DateTime.Now.Year </p>
+                </footer>
+            </div>
+
+        </div>
+        <script src="~/Scripts/jquery-3.3.1.js"></script>
+
+        <script src="~/Scripts/bootstrap.js"></script>
+        @*<script src="~/Scripts/VueJS_Scripts/jquery-confirm-master/dist/jquery-confirm.min.js"></script>*@
+        <script src="~/Scripts/jquery-confirm.js"></script>
+        <script src="~/Scripts/jquery.signalR-2.4.1.min.js"></script>
+
+        <script src="~/signalr/hubs"></script>
+        @Html.Partial("~/Views/Shared/Scripts/SignalR_.cshtml")
+        <script src="~/Scripts/VueJS_Scripts/lodash.core.js"></script>
+        <script src="~/Scripts/vuejs/vue.js"></script>
+        <script src="~/Scripts/vuejs/v-mask.js"></script>
+        <script src="~/Scripts/vuejs/vue-popper.min.js"></script>
+        <script src="~/Scripts/Lib/VueScripts/alert-service.js"></script>
+        <script src="~/Scripts/Lib/VueScripts/web-service.js"></script>
+        <script src="~/Scripts/Lib/axios.js"></script>
+        <script src="~/Scripts/Lib/xtools.js"></script>
+        <script src="~/Scripts/Lib/decimal.js"></script>
+        <script src="~/Scripts/jquery.datetimepicker.full.js"></script>
+        <script src="~/Scripts/JSLINQ.js"></script>
+        <script src="~/Scripts/jslinq.min.js"></script>
+        <script src="~/Scripts/moment.js"></script>
+        <script src='https://unpkg.com/react-player/dist/ReactPlayer.standalone.js'></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+        @Html.Partial("~/Scripts/VueApp/component-inc.cshtml")
+        @Html.Partial("~/Views/Shared/Scripts/_LoadingBox.cshtml")
+        <script>
+            var admin = "";
+            var map = {};
+
+            document.onkeydown = function (e) {
+
+                switch (e.keyCode) {
+                    case 18: {
+                        map[e.keyCode] = e.type == 'keydown';
+                        //$alert(admin);
+                    } break;
+                    case 83: {
+                        map[e.keyCode] = e.type == 'keydown';
+                        if (map[18] && map[83]) {
+                            $("#admin_btn").show();
+                        }
+                    }
+
+                }
+            }
+
+        </script>
+
+        @RenderSection("scripts", required: false)
+
+    </body>
+</html>

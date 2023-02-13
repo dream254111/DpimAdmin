@@ -1,0 +1,48 @@
+﻿<template id="vue-table-sticky">
+    <div class="stickcontainer" :style="{'height':height}">
+        <slot></slot>
+    </div>
+</template>
+<script type="text/javascript">
+    Vue.component('table-sticky', {
+        template: '#vue-table-sticky',
+        props: [
+            'height'
+        ],
+        data() {
+            return {
+
+            }
+        },
+        methods: {
+
+        },
+        computed: {
+
+        }
+    });
+</script>
+<style scoped>
+    div.stickcontainer {
+        overflow: scroll;
+        margin: 0px !important;
+        padding: 0px !important;
+    }
+
+    table {
+        margin: 0px !important;
+        padding: 0px !important;
+    }
+
+    thead th {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+    }
+
+    tbody th {
+        position: -webkit-sticky;
+        position: sticky;
+        left: 0;
+    }
+</style>

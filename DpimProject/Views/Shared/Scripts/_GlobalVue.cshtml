@@ -1,0 +1,410 @@
+﻿<script>
+
+    let $alert = function (title, message, alert_type, callback) {
+        let title_text = `<span><i class="text-${alert_type}"><i class="fa fa-${alert_type == 'danger' ? 'times-circle' : alert_type == 'success' ? 'check-circle' : alert_type == 'info' ? 'info-circle' : alert_type == 'warning' ? 'exclamation-circle' : 'info-circle'}"></i> ${title}</span>`
+
+        $.alert({
+            title: title_text,
+            content: message,
+            btnClass: 'btn-info',
+            buttons: {
+                ok: {
+                    text: 'OK',
+                    btnClass: 'btn-info',
+                }
+            },
+            onClose: function () {
+                if (callback) {
+                    callback()
+                }
+            },
+        });
+    };
+
+    let $confirm = function (text, ok_function, no_fuction) {
+        $.confirm({
+            title: '<i class="fa fa-question-circle"></i>',
+            content: text,
+            buttons: {
+                yes: {
+                    text: 'Yes',
+                    btnClass: 'btn-primary',
+                    //keys: ['enter', 'shift'],
+                    action: function () {
+                        if (ok_function) {
+                            ok_function()
+                        }
+                    },
+                },
+                no: {
+                    text: 'No',
+                    btnClass: 'btn-danger',
+                    //keys: ['enter', 'shift'],
+                    action: function () {
+                        if (no_fuction) {
+                            no_fuction();
+                        }
+                    }
+                }
+            }
+        });
+    };
+
+    let $prompt = function (text, callback) {
+        $.confirm({
+            title: 'Prompt!',
+            content: '<p>' + text + '</p>' +
+            '<form action="" class="formName">' +
+            '<div class="form-group">' +
+            //'<label>' + text + '</label>' +
+            '<textarea type="text" placeholder="" class="name form-control" rows="3"></textarea>' +
+            '</div>' +
+            '</form>',
+            buttons: {
+                formSubmit: {
+                    text: 'OK',
+                    btnClass: 'btn-blue',
+                    action: function () {
+                        var name = this.$content.find('.name').val();
+                        callback(name);
+                    }
+                },
+                cancel: function () {
+                    //close
+                },
+            },
+            onContentReady: function () {
+                // bind to events
+                var jc = this;
+                this.$content.find('form').on('submit', function (e) {
+                    // if the user submits the form by pressing enter in the field.
+                    e.preventDefault();
+                    jc.$$formSubmit.trigger('click'); // reference the button and click it
+                });
+            }
+        });
+    }
+</script>
+
+<script>
+
+    let $_get = function (url, fn, done) {
+        let error = false
+        $$get(baseUrl + url, (d) => {
+            if (fn) {
+                fn(d)
+            }
+        }, err => {
+            $notify.error(err);
+            error = true;
+
+        }, () => {
+            if (done) {
+                done()
+            };
+
+        }, (per) => {
+
+            $loadingBar.go(per)
+
+        });
+    };
+
+    //let process_loading = false;
+    let $_post = function (obj, url, fn, done) {
+        let error = false;
+        //if (process_loading) return;
+        if (!(obj && obj.constructor && obj.constructor.name && obj.constructor.name == 'FormData')) { obj = JSON.stringify(obj); }
+        process_loading = true;
+        $$post(obj, baseUrl + url, d => {
+            // process_loading = false;
+            if (fn) {
+                fn(d)
+            }
+        }, err => {
+            // process_loading = true;
+            $notify.error(err);
+
+            error = true;
+        }, () => {
+            // process_loading = true;
+            if (done) {
+                done();
+            };
+
+        }
+        //,
+        //(per) => {
+
+        //        $loadingBar.go(per)
+
+        //}
+        );
+    };
+</script>
+<script>
+    Vue.config.keyCodes.f2 = 113;
+    Vue.directive('mask', VueMask.VueMaskDirective);
+    Vue.filter('number', function (value, digit) {
+        digit = digit || 0;
+        if (isNaN(value)) {
+            return '';
+        } else {
+            value = parseFloat(value);
+            return value.formatN(digit);
+        }
+    });
+    Vue.filter('date', function (value, format) {
+        format = format || 'DD/MM/YYYY';
+        if (!Date.tryParse(value) || !format) {
+            return '';
+        } else {
+            return moment(Date.tryParse(value)).format(format);
+        }
+    })
+    Vue.component('Datepicker', {
+        //template: '<input type="text" v-bind:value="value" @@input="updateVal($event.target.value)" v-mask="\'##/##/####\'" placeholder="__/__/____" :disabled="disabled" @@focus="createPicker">',
+        template: '<input type="text" v-bind:value="value" @@input="updateVal($event.target.value)" placeholder="__/__/____" :disabled="disabled" @@focus="createPicker">',
+        props: ['value', 'disabled'],
+        data: function () {
+            return {
+                date: this.value
+            };
+        },
+        methods: {
+            updateVal: function (val) {
+                this.$emit('input', String(val));
+            }, createPicker: function () {
+
+            }
+        },
+        mounted() {
+            $(this.$el).datetimepicker({
+                timepicker: false,
+                format: 'd/m/Y',
+                lang: 'en',
+                closeOnDateSelect: true,
+                scrollMonth: false,
+                scrollTime: false,
+                scrollInput: false,
+                onSelectDate: (val) => {
+                    this.date = moment(val).format('DD/MM/YYYY');
+                    this.$emit('input', String(this.date));
+                },
+
+                //onSelectTime: function () {
+                //    console.log('onSelectTime')
+                //},
+                //onChangeMonth: function () { console.log('onChangeMonth') },
+                //onChangeYear: function () { console.log('onChangeYear') },
+                //onChangeDateTime: function () { console.log('onChangeDateTime') },
+                //onShow: function () { console.log('onShow') },
+                //onClose: function () { console.log('onClose') },
+                onGenerate: (val) => {
+                    if (this.value && moment(val).isValid) {
+                        this.date = moment(val).format('DD/MM/YYYY');
+                        this.$emit('input', String(this.date));
+                    } else {
+                        this.$emit('input', '');
+                    }
+                },
+            });
+        }
+    });
+    Vue.component('Number', {
+        props: {
+            value: null,
+            decimals: String,
+        },
+        template: '<input v-model="displayValue" @@blur="handleInputState" @@focus="handleInputState" class="text-right">',
+        data: function () {
+            return {
+                inputFocused: false
+            }
+        },
+        methods: {
+            handleInputState (event) {
+                this.inputFocused = event.type === 'focus'
+                if (!this.inputFocused) {
+                    //this.value = isNaN(this.value) ?  : this.value
+                    //console.log(this.value)
+                    // this.value = isNaN(this.value) ? value : isNaN(parseFloat(this.value)) ? '' : parseFloat(this.value).formatN(parseInt(this.decimals));
+                }
+            },
+            unmask (value, decimals) {
+                value = value == null ? '0' : value;
+                value = value.toString().replace(/,/g, '');
+                return value// isNaN(value) ? 0 : parseFloat(value);
+            },
+            mask (value, decimals) {
+                value = value == null ? '0' : value;
+                value = value.toString().replace(/,/g, '');
+                value = isNaN(value) ? value : isNaN(parseFloat(value)) ? '' : parseFloat(value).formatN(this.decimals);
+                return value
+            },
+            validate(e) {
+                ///^-?\d{2}(\.\d+)?$/
+            }
+        },
+        computed: {
+            displayValue: {
+                get: function () {
+                    if (this.inputFocused) {
+                        return this.value
+                    } else {
+                        //return (isNaN(this.value)) ? this.value : this.mask(this.value, this.decimals)
+                        if (isNaN(this.value)) {
+                            //if (this.value === 0) {
+                            //    return 0;
+                            //} else if (!this.value) {
+                            //    this.value = null;
+                            //    return null;
+                            //} else {
+                            //    return null
+                            //}
+
+                            return this.value
+                        } else {
+                            //this.value = Math.round2(this.value, this.decimals);
+                            return this.mask(this.value, this.decimals)
+                        }
+                    }
+                },
+                set: function (modifiedValue) {
+                    this.$emit('input', this.unmask(modifiedValue, this.decimals));
+                }
+            }
+        }
+    });
+
+    let vueHeader = new Vue({
+        el: '#header',
+        data: {
+            title: '',
+            name: "@((ViewBag.Auth?.empname??"").Replace(",",""))",
+            username: "@((ViewBag.Auth?.userid??"").Replace(",", ""))"
+        },
+        methods: {
+            showLogOff: function () {
+                $('#logout_modal').modal('show');
+            }
+        }
+    });
+
+    let vueFooter = new Vue({
+        el: '#footer',
+        data: {
+            sessionsOn: null,
+            sessionsMax: null
+        },
+        methods: {
+            scrollTop: function () {
+                $scrollUp('html,body', 0);
+            }
+        }
+    });
+
+    const mg_global = {
+        data: {
+            process: {
+                loading: false
+            },
+        },
+        methods: {
+            //_get: function (url, fn, done) {
+            //    let error = false
+            //    $$get(baseUrl + url, (d) => {
+            //        if (fn) {
+            //            fn(d)
+            //        }
+            //    }, err => {
+            //        $notify.error(err);
+            //        error = true;
+
+            //    }, () => {
+            //        if (done) {
+            //            done()
+            //        };
+
+            //    }, (per) => {
+
+            //        $loadingBar.go(per)
+
+            //    });
+            //},
+            //_post: function (obj, url, fn, done) {
+            //    let error = false;
+            //    if (this.process.loading) return;
+            //    if (!(obj && obj.constructor && obj.constructor.name && obj.constructor.name == 'FormData')) { obj = JSON.stringify(obj); }
+            //    this.process.loading = true;
+            //    $$post(obj, baseUrl + url, d => {
+            //        this.process.loading = false;
+            //        if (fn) {
+            //            fn(d)
+            //        }
+            //    }, err => {
+            //        this.process.loading = false;
+            //        $notify.error(err);
+
+            //        error = true;
+            //    }, () => {
+            //        this.process.loading = false;
+            //        if (done) {
+            //            done();
+            //        };
+
+            //    }
+            //    //,
+            //    //(per) => {
+
+            //    //        $loadingBar.go(per)
+
+            //    //}
+            //    );
+            //},
+            _round: function (n, p) {
+                return Math.round2(n, p);
+            },
+            _floor: function (n) {
+                return Math.floor(n);
+            },
+            _ceil: function (n) {
+                return Math.ceil(n);
+            },
+            _float: function (n) {
+                return isNaN(n) ? 0 : parseFloat(n);
+            },
+            _int: function (n) {
+                return isNaN(n) ? 0 : parseInt(n);
+            },
+            _date: function (n) {
+                return (moment(n, 'DD/MM/YYYY').isValid()) ? moment(n, 'DD/MM/YYYY') : null;
+            },
+            _thaiDateString: function (iso) {
+                return (moment(iso).isValid()) ? moment(iso).format('DD/MM/YYYY') : iso;
+            }
+            ,
+            _loadbox: function () { return $loadingBox },
+            _noti: function () { return $notify },
+            _x: function (arr) { return $linq(arr) },
+            _qs: function () { return $$param },
+            _cookies: function () { return $$cookies },
+            _escape: function (s) {
+                return this._trim(encodeURIComponent(s || ''));
+            },
+            _trim: function (s) {
+                return $.trim(s || '');
+            },
+            _isIsoTimeFormat: function (t) {
+                return /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/.test(t);
+            },
+            _goto: function (id) {
+                $(`#${id}`).focus()
+            },
+        },
+        compute: {
+        },
+        mounted: function () {
+        }
+    };
+</script>

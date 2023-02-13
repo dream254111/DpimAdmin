@@ -1,0 +1,354 @@
+﻿.navbar-admin-header {
+    position: absolute;
+    height: 64px;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    background: #FFFFFF;
+}
+.navbar-admin-logo {
+    position: absolute;
+    left: 1.5%;
+    right: 0;
+    top: 7.14%;
+    bottom: -4.76%;
+ 
+}
+.navbar-admin-brandname {
+    position: absolute;
+    width: 178px;
+    height: 32px;
+    left: 73px;
+    top: 16px;
+    font-family: Noto Sans Thai;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 32px;
+    /* identical to box height, or 200% */
+    color: #333333;
+}
+.sidebar-admin {
+    position: absolute;
+    width: 256px;
+    height: 836px;
+    left: 0px;
+    top: 64px;
+    background: #FFFFFF;
+}
+.sidebar-admin-pic {
+    position: absolute;
+    left: 12.89%;
+    right: 62.11%;
+    top: 2.87%;
+    bottom: 89.47%;
+border-radius:50%;
+max-height:64px;
+max-width:64px;
+}
+.sidebar-username {
+    position: absolute;
+    left: 12.89%;
+    right: 68.36%;
+    top: 11.48%;
+    bottom: 85.65%;
+    /* Noto Sans Thai / Normal-Regular */
+    font-family: Noto Sans Thai;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 24px;
+    /* identical to box height, or 150% */
+    /* Black / Black 3 */
+    color: #333333;
+    width:100%;
+}
+
+.sidebar-permiission {
+    position: absolute;
+    left: 12.89%;
+    right: 60.16%;
+    top: 14.35%;
+    bottom: 83.49%;
+    /* Noto Sans Thai / Tiny-Regular */
+    font-family: Noto Sans Thai;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 18px;
+    /* identical to box height, or 150% */
+    /* Gray 3 */
+    color: #828282;
+    width: 100%;
+}
+.sidebar-menu {
+    position: absolute;
+    left: 13.28%;
+    right: 73.83%;
+    top: 17.58%;
+    bottom: 80.5%;
+    font-family: Sarabun;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 16px;
+    /* identical to box height */
+    color: #B7B7B7;
+}
+.sidebar-dropdown {
+    position: absolute;
+    left: 26.56%;
+    right: 31.64%;
+    top: 21.77%;
+    bottom: 75.84%;
+    /* Noto Sans Thai / Small-Regular */
+    font-family: Noto Sans Thai;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 20px;
+    /* identical to box height, or 143% */
+    color: #333333;
+}
+.sidebar-ico {
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 6.25%;
+    max-height:17px;
+    max-width:20px;
+    bottom: 4.86%;
+    background-image: url('../image/Vector@2x.png');
+    background-repeat:no-repeat;
+}
+.sidebar-menu-arrow {
+    position: absolute;
+    width: 6px;
+    height: 2px;
+    left: calc(50% - 6px/2 + 3px);
+    top: calc(50% - 2px/2 + 3.89px);
+    /* Character/Primary .65 */
+    background: rgba(0, 0, 0, 0.65);
+    transform: rotate(-135deg);
+}
+
+/* CourseManage.Instructor */
+.course-title {
+    position: absolute;
+    height: 64px;
+    left: 256px;
+    right: 0px;
+    top: 64px;
+    background: #00937B;
+}
+
+    .course-title .course-text {
+        position: absolute;
+        width: 190px;
+        height: 20px;
+        left: 497px;
+        top: 22px;
+
+        font-family: Noto Sans Thai;
+        font-style: normal;
+        font-weight: bold;
+        font-size: 14px;
+        line-height: 20px;
+        
+        display: flex;
+        align-items: center;
+        color: #FFFFFF;
+    }
+
+.course-search {
+    position: absolute;
+    left: 273px;
+    top: 142px;
+
+    width: 300px;
+    height: 35px;
+
+    background: #FFFFFF;
+    border-radius: 5px;
+}
+
+.course-add-instructor {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 8px 0px 0px 16px;
+
+    position: absolute;
+    width: 100px;
+    height: 32px;
+    right: 17px;
+    top: 142px;
+
+    background: #00937B;
+    box-shadow: 0px 2px 0px rgba(0, 0, 0, 0.043);
+    border-radius: 2px;
+}
+
+    .course-add-instructor .course-text {
+        position: static;
+        width: 68px;
+        height: 21px;
+        left: 16px;
+        top: 5.5px;
+
+        font-family: Noto Sans Thai;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 14px;
+        line-height: 21px;
+        text-align: center;
+
+        color: #FFFFFF;
+
+        flex: none;
+        order: 0;
+        align-self: center;
+        flex-grow: 0;
+        margin: 8px 0px;
+    }
+
+.course-table {
+    position: absolute;
+    width: 100%;
+    height: 48px;
+    left: 273px;
+    top: 197px;
+
+    background: rgba(0, 147, 123, 0.08);
+    border: 1px solid #F2F2F2;
+    box-sizing: border-box;
+    border-radius: 4px 4px 0px 0px;
+}
+
+    .course-table td {
+        font-family: Noto Sans Thai;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 14px;
+        line-height: 21px;
+        color: #333333;
+    }
+
+/* CourseManage.AddInstructor */
+.course-add-container {
+    position: absolute;
+    top: 64px;
+    left: 256px;
+    right: 0px;
+    bottom: 0px;
+}
+
+    .course-add-container .course-add-title {
+        position: relative;
+        height: 64px;
+        left: 0px;
+        background: #00937B;
+    }
+
+        .course-add-container .course-add-title .course-add-text {
+            position: relative;
+            width: 107px;
+            height: 20px;
+            left: 539px;
+            top: 22px;
+
+            font-family: Noto Sans Thai;
+            font-style: normal;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 20px;
+
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #FFFFFF;
+        }
+
+    .course-add-container .course-add-subtitle {
+        position: relative;
+        top: 16px;
+        left: 24px;
+
+        font-family: Noto Sans Thai;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 16px;
+        line-height: 24px;
+
+        color: #00937B;
+
+        flex: none;
+        order: 0;
+        align-self: center;
+        flex-grow: 0;
+        margin: 48px 0px;
+    }
+
+    .course-add-container .course-add-image {
+        display: inline-block;
+        position: relative;
+        left: 24px;
+        top: 32px;
+        width: 128px;
+        height: 128px;
+    }
+
+        .course-add-container .course-add-image img {
+            max-width: 100%;
+        }
+
+    button.course-add-image-button {
+    
+        position: absolute;
+        left: 199px;
+        top: 249px;
+
+        width: 70px;
+        height: 32px;
+        
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        padding: 8px 16px;
+
+        background: #00937B;
+        box-shadow: 0px 2px 0px rgba(0, 0, 0, 0.043);
+        border-radius: 2px;
+    }
+
+        button.course-add-image-button span {
+            width: 38px;
+            height: 21px;
+            left: 16px;
+            top: 5.5px;
+
+            font-family: Noto Sans Thai;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 14px;
+            line-height: 21px;
+            text-align: center;
+
+            color: #FFFFFF;
+
+            flex: none;
+            order: 0;
+            align-self: center;
+            flex-grow: 0;
+            margin: 8px 0px;
+        }
+
+    .course-add-container form .column {
+        display: inline-block;
+        width: 200px;
+        margin: 16px;
+    }
+
+        .column input {
+            width: 100%;
+        }

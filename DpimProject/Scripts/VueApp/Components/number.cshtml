@@ -1,0 +1,79 @@
+﻿<script type="text/x-template" id="vue-component-template-number">
+    <input v-model="displayValue" v-on:blur="handleInputState" v-on:focus="handleInputState" v-on:keypress="isNumber" v-on:paste="onPaste" class="text-right" v-bind:placeholder="placeholder" v-on:keyup="keyup">
+</script>
+<script>
+    Vue.component('number', {
+        props: {
+            value: null,
+            decimals: String,
+        },
+        template: '#vue-component-template-number',
+        data() {
+            return {
+                inputFocused: false,
+                placeholder: (0).toFixed(this.decimals)
+            }
+        },
+        methods: {
+            handleInputState(event) {
+                this.inputFocused = event.type === 'focus'
+                if (this.inputFocused) {
+                    //this.$nextTick(() => {
+                    //    console.log(eve)
+                    //})
+                    if (event.target.value == 0) {
+                        //this.$emit('input', '');
+                    }
+                }
+            },
+            isNumber(evt) {
+                evt = (evt) ? evt : window.event;
+                var charCode = (evt.which) ? evt.which : evt.keyCode;
+                if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 46 && charCode !== 45) {
+                    evt.preventDefault();;
+                } else {
+                    return true;
+                }
+            },
+            onPaste(evt) {
+                evt.preventDefault();
+            },
+            unmask(value, decimals) {
+                return value
+            },
+            mask(value, decimals) {
+                return value
+            },
+            validate(e) {
+                ///^-?\d{2}(\.\d+)?$/
+            },
+            keyup() {
+                this.$emit('keyup', this.displayValue)
+            },
+        },
+        computed: {
+            displayValue: {
+                get: function () {
+                    let place = (this.value || '').toString().split('.');
+                    let d = this.decimals || 0;
+                    if (place.length > 0 && place[1]) {
+                        d = place[1].toString().length > d ? place[1].toString().length : d;
+                    }
+
+                    if (this.inputFocused) {
+                        return $dtl.isNullOrEmpty(this.value) || isNaN(this.value) || isNaN(parseFloat(this.value)) ? this.value : (this.value).toString().replace(/,/g, '');
+                    } else {
+                        let v = $dtl.isNullOrEmpty(this.value) || isNaN(this.value) || isNaN(parseFloat(this.value)) ? this.value : $dtl.numberFormat($dtl.float(this.value, d).toFixed(d));
+                        //this.$emit('input', v);
+                        //alert(v)
+                        return v;
+                    }
+                },
+                set: function (modifiedValue) {
+                    let d = this.decimals || 0;
+                    this.$emit('input', modifiedValue);
+                }
+            }
+        }
+    });
+</script>

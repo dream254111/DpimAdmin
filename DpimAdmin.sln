@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1209
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DpimProject", "DpimProject\DpimProject.csproj", "{87FEEEEE-38E7-4B60-8F47-383E40183D20}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{87FEEEEE-38E7-4B60-8F47-383E40183D20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87FEEEEE-38E7-4B60-8F47-383E40183D20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87FEEEEE-38E7-4B60-8F47-383E40183D20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87FEEEEE-38E7-4B60-8F47-383E40183D20}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {742C2C81-F9F4-4CC7-90FB-94595272A488}
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 2
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://dpimacademy-apis.dpim.go.th:8080/tfs/defaultcollection
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = DpimProject\\DpimProject.csproj
+		SccProjectName1 = DpimProject
+		SccLocalPath1 = DpimProject
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,77 @@
+﻿@{
+    Layout = null;
+    var baseUrl = $"{Request.Url.Scheme}://{Request.Url.Authority}{Url.Content("~/")}";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mango Anywhere | Login</title>
+    <link rel="icon" href="http://asiadigitalexpo.com/backend/assets/images/exhibitor/logo_29157.jpg">
+    <script>let signalRComponent = {};</script>
+    <link href="~/Framework2/Lib/ERP.theme/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Framework2/Lib/ERP.theme/css/style.css" rel="stylesheet" />
+    <link href="~/Framework2/Lib/ERP.theme/css/mango.css" rel="stylesheet" />
+    <link href="~/Framework2/Lib/ERP.theme/css/plugins/toastr/toastr.min.css" rel="stylesheet" />
+    <link href="~/Framework2/Lib/ERP.theme/css/jquery-ui.css" rel="stylesheet" />
+    <link href="~/Framework2/Lib/ERP.theme/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+    <link href="~/Framework2/Lib/ERP.theme/css/plugins/dropzone/basic.css" rel="stylesheet">
+    <link href="~/Framework2/Lib/ERP.theme/css/plugins/dropzone/dropzone.css" rel="stylesheet">
+    <link href="~/Framework2/Lib/ERP.theme/css/plugins/Hover-master/css/hover-min.css" rel="stylesheet" />
+    <link href="~/Framework2/Lib/ERP.theme/css/plugins/switchery/switchery.css" rel="stylesheet">
+    <link href="~/Framework2/Lib/ERP.theme/css/plugins/select2/select2.min.css" rel="stylesheet">
+    <link href="~/Framework2/Lib/ERP.theme/css/animate.css" rel="stylesheet" />
+    <link href="~/Scripts/jquery-confirm-master/dist/jquery-confirm.min.css" rel="stylesheet" />
+    <link href="~/Scripts/jq-datetimepicker/jquery.datetimepicker.css" rel="stylesheet" />
+    <link href="~/Framework2/Lib/fontawesome-free-5.2.0-web/css/all.css" rel="stylesheet" />
+    <link href="~/Framework2/Lib/ERP.theme/font-awesome/css/font-awesome.css" rel="stylesheet" />
+    <link href="~/Framework2/Lib/ERP.theme/css/plugins/themify-icons/themify-icons.min.css" rel="stylesheet" />
+    <link href="~/Framework2/Lib/ERP.theme/flag-icon-css-master/css/flag-icon.css" rel="stylesheet" />
+    <link href="~/Framework2/Lib/ERP.theme/css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet" />
+    <base href="@(baseUrl)" postback="" />
+</head>
+
+<body class="gray-bg" style="overflow:hidden">
+
+    @RenderBody()
+
+    <script src="~/Scripts/jquery-3.3.1.js"></script>
+    <script src="~/Framework2/Lib/ERP.theme/js/jquery-ui.min.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.3.0.js"></script>
+    <script src="~/SignalR/Hubs"></script>
+    <script src="~/Scripts/iwc-all.js"></script>
+    <script src="~/Scripts/signalr-patch.js"></script>
+    <script src="~/Scripts/iwc-signalr.js"></script>
+    <script src="~/Scripts/jquery-confirm-master/dist/jquery-confirm.min.js"></script>
+    <script src="~/Scripts/jq-datetimepicker/jquery.datetimepicker.js"></script>
+    <script src="~/Scripts/VueJS_Scripts/moment.min.js"></script>
+    <script src="~/Scripts/VueJS_Scripts/lodash.core.js"></script>
+    <script src="~/Framework2/Lib/ERP.theme/js/jquery-resizable.js"></script>
+    <script src="~/Framework2/Lib/ERP.theme/js/popper.min.js"></script>
+    <script src="~/Framework2/Lib/ERP.theme/js/bootstrap.js"></script>
+    <script src="~/Scripts/linq/jslinq.min.js"></script>
+    <script src="~/Framework2/Lib/ERP.theme/js/inspinia.js"></script>
+    <script src="~/Framework2/Lib/ERP.theme/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+    <script src="~/Framework2/Lib/ERP.theme/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="~/Framework2/Lib/ERP.theme/js/plugins/slimscroll/jquery.slimscroll.js"></script>
+    <script src="~/Framework2/Lib/ERP.theme/js/plugins/jasny/jasny-bootstrap.min.js"></script>
+    <script src="~/Framework2/Lib/ERP.theme/js/plugins/dropzone/dropzone.js"></script>
+    <script src="~/Framework2/Lib/ERP.theme/js/plugins/pace/pace.min.js"></script>
+    <script src="~/Framework2/Lib/ERP.theme/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <script src="~/Framework2/Lib/tableHeadFixer.js"></script>
+    <script src="~/Scripts/notify/toastr.js"></script>
+    <script src="~/Scripts/vuejs/vue.js"></script>
+    <script src="~/Scripts/vuejs/v-mask.js"></script>
+    <script src="~/Scripts/vuejs/vue-popper.min.js"></script>
+    <script src="~/Scripts/scrolltopcontrol.js"></script>
+    <script src="~/Framework2/Lib/VueScripts/alert-service.js"></script>
+    <script src="~/Framework2/Lib/VueScripts/web-service.js"></script>
+    <script src="~/Framework2/Lib/axios.js"></script>
+    <script src="~/Framework2/Lib/xtools.js"></script>
+    <script src="~/Framework2/Lib/decimal.js"></script>
+    @Html.Partial("~/Framework2/VueApp/component-inc.cshtml")
+    @Html.Partial("~/Views/Shared/Scripts/_LoadingBox.cshtml")
+    @RenderSection("scripts", false)
+</body>
+</html>

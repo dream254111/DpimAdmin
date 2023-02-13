@@ -1,0 +1,38 @@
+﻿<script type="text/x-template" id="tmp_tab">
+    <div class="tabs-container">
+        <ul class="nav nav-tabs">
+            <li v-for="t in tabsData" v-bind:class="{'active':t.id==selectedTabData}" v-on:click.prevent="tabClick(t.id)" v-show="t.show">
+                <a v-on:click.prevent="" href="#">
+                    <i class="fa" v-bind:class="[iconColor(t, selectedTabData), 'fa-'+(t.icon||'circle')]"></i>&nbsp;&nbsp;{{t.text}} <span v-if="t.badge" class="badge badge-sm m-l-xs" v-bind:class="[t.badgeClass]">{{t.badge}}</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</script>
+<script>
+    Vue.component('mg-tab', {
+        template: '#tmp_tab',
+        props: ['tabData', 'selectedTabData'],
+        data: function () {
+            return {
+                tabsData: this.tabData,
+                activeTab: this.selectedTabData,
+            };
+        },
+        methods: {
+            showTabMain(tab_name) {
+                return tab_name === this.activeTab
+            },
+            tabClick(tab_name) {
+                this.activeTab = tab_name
+                this.$emit('tab-change', { tabId: this.activeTab })
+            },
+            iconColor(t, selectedTabData) {
+                if (t.id == selectedTabData) return t.iconColor;
+            }
+        },
+        mounted: function () {
+
+        }
+    });
+</script>

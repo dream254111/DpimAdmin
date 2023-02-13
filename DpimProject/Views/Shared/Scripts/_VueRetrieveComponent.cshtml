@@ -1,0 +1,216 @@
+﻿
+<script type="text/x-template" id="template-retrieve">
+    <div id="modalRetrive" class="modal fade" role="dialog" v-bind:class="class_name">
+        <div class="modal-dialog" style="width:94%;">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h4 class="modal-title"><i class="fa fa-quare" aria-hidden="true"></i>  {{ tmp_name }}</h4>
+                    <span style="padding-right:5px; margin-top:-30px;" class="pull-right">
+                        <button class="btn btn-rounded btn btn-icon btn-danger hoverBtn" data-toggle="tooltip" title="Close" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i></button>
+                    </span>
+                </div>
+                <div class="modal-body">
+                    <slot></slot>
+                    <div class="table-responsive" style="height:80%;max-height:450px">
+                        <table class="table b-t b-light">
+                            <thead>
+                                <tr style="font-size:12px;">
+                                    <th style="width:20px;" v-show="multiple"></th>
+                                    <th v-for="x in data_fields" v-bind:style="{width:(x.width||100)+'px',maxWidth:(x.width||100)+'px'}" style="text-align:center !important">
+                                        <span v-show="!x.sort">{{x.name}}</span>
+                                        <span v-show="x.sort">
+                                            <a href="#" v-on:click.prevent="updateSort(x.key)" data-toggle="tooltip" title="Click to sort data rows.">
+                                                {{x.name}}
+                                                <span>
+                                                    <i class="fa fa-sort-alpha-asc" v-show="sort_key==x.key&&sort_type=='asc'&&x.type=='s'"></i>
+                                                    <i class="fa fa-sort-alpha-desc" v-show="sort_key==x.key&&sort_type=='desc'&&x.type=='s'"></i>
+                                                    <i class="fa fa-sort-amount-asc" v-show="sort_key==x.key&&sort_type=='asc'&&x.type!='s'"></i>
+                                                    <i class="fa fa-sort-amount-desc" v-show="sort_key==x.key&&sort_type=='desc'&&x.type!='s'"></i>
+                                                </span>
+                                            </a>
+                                        </span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(rf,index) in Retrivefor" v-on:click="selectChange(index)" style="cursor:pointer" v-bind:class="{'success':rf.checked}" tabindex="index">
+                                    <td v-show="multiple">
+                                        <label class="i-checks">
+                                            <input type="checkbox" v-bind:checked="rf.checked" v-on:change="selectChange(index)" mg-col="h_data['checked']">
+                                            <i style="margin-top:-5px;"></i>
+                                        </label>
+                                    </td>
+                                    <td v-for="x in data_fields"
+                                        v-bind:style="{width:(x.width||100)+'px', maxWidth:(x.width||100)+'px', textAlign:(x.type=='n0' || x.type=='n2' ? 'right' : 'left') }">
+                                        {{retrieveFilterShow(rf[x.key], x.type || 's')}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <ul class="pagination pagination-sm">
+                                <li v-for="x in pageArray" v-bind:class="{active:x.active}" v-on:click.prevent="retrieveSetPage(x.page_no);loadRetrieve();">
+                                    <a v-on:click.prevent="" href="#" v-bind:class="{active:x.active}">{{x.page_no|number(0)}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-sm-3">
+                            <button class="btn btn-sm btn-primary" v-on:click="sendRetrieve">Select</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+<script>
+    Vue.component('mgRetrieve', {
+        template: '#template-retrieve',
+        props: [
+            'title',
+            'multiple',
+            'fields',
+            'url',
+            'itemsPerPage',
+            'modalClass',
+            'searchData'
+        ],
+        data() {
+            return {
+                retrieveSearch: {
+                },
+                Retrivefor: [],
+                pageArray: [],
+                class_name: this.modalClass,
+                tmp_name: this.title,
+                data_fields: this.fields,
+                retrivePagination: new Pagination(),
+                selected_item: null,
+                sort_key: '',
+                sort_type: 'asc',
+                retrieveSearch: this.searchData
+            }
+        },
+        methods: {
+            loadRetrieve() {
+                let field_type = $linq(this.data_fields).where(x=>x.key == this.retrieveSearch.field).select(x=>x.type).firstOrDefault() || 's';
+                this.$set(this.retrieveSearch, 'field_type', field_type);
+
+                let page = this.retrievePaging();
+                let url = this.url + `?skip=${page.skipItems()}&take=${page.getItemsPerPage() || 10}&sort=${this.sort_key}&sort_type=${this.sort_type}`;
+                for (var key in this.retrieveSearch) {
+                    url += `&${key}=${encodeURIComponent(this.retrieveSearch[key])}`;
+                }
+                $_get(url, (d) => {  // select data จาก Databass
+
+                    let i = 0;
+                    $linq(d.data).foreach(x=> {
+                        x.ref_item_vue = i++;
+                        x.checked = false;
+                    });
+
+                    let page = this.retrievePaging();
+                    page.setTotalItems(d.total);
+
+                    this.$set(this, 'Retrivefor', d.data);
+                    this.$set(this, 'pageArray', page.createPagesArray());
+
+                }, () => {
+
+                });
+            },
+            selectRetrive(x) { // select Date ที่เลือก
+                $(`.${this.modalClass}`).modal('hide');
+                //var data = $linq(this.Retrivefor).where(z=>z.select == true).toArray(); // เลือก Data เฉพาะ ที่ Select
+                if (this.retrive) {
+                    this.retrive(x);
+                }
+            },
+            retrieveFilterShow(x, y) {
+                x = x || '';
+                if (y == 'n2') {
+                    return this.$options.filters.number(x, 2);
+                }
+                else if (y == 'n0') {
+                    return this.$options.filters.number(x, 0);
+                }
+                else if (y == 'd') {
+                    return this.$options.filters.date(x);
+                }
+                else {
+                    return x.toString();
+                }
+            },
+            retrieveSearchClick() {
+                this.retrieveSetPage(1);
+                this.loadRetrieve();
+            },
+            retrievePaging() {
+                return this.retrivePagination;
+            },
+            retrieveSetPage(x) {
+                let page = this.retrievePaging();
+                this.retrievePaging().setCurrentPage(x);
+            },
+            modalOpen() {
+                $(`.${this.modalClass}`).modal('show');
+                $(`.${this.modalClass}`).on('shown.bs.modal', () => {
+                    //this.$refs.searchBox.focus();
+                });
+            },
+            doSearch(data) {
+                this.retrieveSearch = data;
+                this.retrieveSetPage(1);
+            },
+            selectChange(z) {
+                if (!this.multiple) {
+                    let c = Object.assign([], this.Retrivefor);
+                    let idx = 0;
+                    $linq(c).foreach(x=> {
+                        x.checked = z === idx;
+                        idx++;
+                    });
+                    this.$set(this, 'Retrivefor', c);
+                    this.$set(this, 'selected_item', $linq(this.Retrivefor).where(x=>x.checked).firstOrDefault() || {});
+                }
+            },
+            sendRetrieve() {
+                this.$emit('selected', this.selected_item || {});
+                $(`.${this.modalClass}`).modal('hide');
+            },
+            updateSort(key) {
+                if (this.sort_key != key) {
+                    this.sort_type = 'asc';
+                } else {
+                    this.sort_type = this.sort_type == 'asc' ? 'desc' : 'asc';
+                }
+                this.sort_key = key;
+                this.retrieveSearchClick()
+            }
+        },
+        computed: {
+            retrieveSearchField() {
+                return $linq(this.data_fields).where(x=>x.search).toArray()
+            },
+            viewChecked() {
+                return $linq(this.Retrivefor).select(z=> { return { checked: z.checked || false, ref_item_vue: z.ref_item_vue } }).toArray();
+            }
+        },
+        mounted() {
+            let page = this.retrievePaging();
+            page.setItemsPerPage(10);
+            this.retrieveSetPage(1);
+            if (this.itemsPerPage) {
+                page.setItemsPerPage(this.itemsPerPage)
+            }
+            this.sort_key = $linq(this.data_fields).where(x=>x.sort && x.sort_default).select(x=>x.key).firstOrDefault() || '';
+            //this.$set(this.retrieveSearch, 'field', $linq(this.data_fields).where(x=>x.search).select(x=>x.key + ',' + x.type).firstOrDefault() || '')
+        }
+    });
+</script>

@@ -1,0 +1,42 @@
+    table.header_table{
+        font-size: 13px;
+    }
+   
+	table.table-style-two {
+		font-family: verdana, arial, sans-serif;
+		font-size: 11px;
+		color: #333333;
+		border-width: 1px;
+		border-color: #000000;
+		border-collapse: collapse;
+        width:100%;
+	}
+ 
+	table.table-style-two th {
+		border-width: 1px;
+		padding: 8px;
+		border-style: solid;
+		border-color: #000000;
+		background-color: #009A44;
+	}
+ 
+	table.table-style-two tr:hover td {
+		background-color: #DFEBF1;
+	}
+ 
+	table.table-style-two td {
+		border-width: 1px;
+		padding: 8px;
+		border-style: solid;
+		border-color: #000000;
+		background-color: #ffffff;
+	}
+
+    .labelprint_main{
+        width:100%;
+        border:1px;
+    }
+    .labelprint_p{
+        width:40%;
+        border:1px;
+    }

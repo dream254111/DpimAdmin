@@ -1,0 +1,52 @@
+﻿<script type="text/x-template" id="vue-component-template-datepicker">
+    <input type="text" v-bind:value="value" v-on:input="updateVal($event.target.value)" placeholder="__/__/____" v-bind:disabled="disabled" v-on:focus="createPicker" >
+</script>
+<script>
+    Vue.component('datepicker', {
+        template: `#vue-component-template-datepicker`,
+        props: [
+            'value',
+            'disabled',
+            'showtime'
+        ],
+        data: function () {
+            return {
+                date: this.value,
+                showtime1: false,
+            };
+        },
+        methods: {
+            updateVal: function (val) {
+              var date=  $(this.$el).find('input').val();
+                this.$emit('input', String(val));
+            }, createPicker: function () {
+
+            }
+        },
+        mounted() {
+            this.showtime1 = this.showtime || false;
+            //$(this.$el).datetimepicker({ format: 'L', change(val) {console.log(val) } });
+            $(this.$el).datetimepicker({
+                timepicker: this.showtime,
+                format: this.showtime1 ? 'd/m/Y H:i' : 'd/m/Y',
+                lang: 'en',
+                closeOnDateSelect: true,
+                scrollMonth: false,
+                scrollTime: this.showtime1,
+                scrollInput: false,
+                onSelectDate: (val) => {
+                    this.date = moment(val).format('DD/MM/YYYY');
+                    this.$emit('input', String(this.date));
+                },
+                onGenerate: (val) => {
+                    if (this.value && moment(val).isValid) {
+                        this.date = this.showtime1 ? moment(val).format('DD/MM/YYYY HH:mm') : moment(val).format('DD/MM/YYYY');
+                        this.$emit('input', String(this.date));
+                    } else {
+                        this.$emit('input', '');
+                    }
+                },
+            });
+        }
+    });
+</script>

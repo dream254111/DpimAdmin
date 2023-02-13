@@ -1,0 +1,36 @@
+﻿<script type="text/javascript">
+    let minxin1 = {};
+    //$(document).ready(function () {
+    //    $('[data-toggle="tooltip"]').tooltip();
+    //})
+    Vue.config.keyCodes.f2 = 113;
+    Vue.directive('mask', VueMask.VueMaskDirective);
+    Vue.filter('number', function (value, digit) {
+        digit = digit || 0;
+        if (digit < 0) {
+            digit = 0;
+        }
+        if ($dtl.isNullOrEmpty(value) || isNaN(parseFloat(value)) || value == 0) {
+            return $dtl.numberFormat($dtl.float(0, digit).toFixed(digit));
+        }
+        return $dtl.numberFormat(digit ? $dtl.float(value, digit).toFixed(digit) : $dtl.int(value));
+    });
+    Vue.filter('date', function (value, format) {
+        format = format || 'DD/MM/YYYY';
+        let m = moment(value);
+        return value ? (m.isValid() ? m.format(format) : value) : null;
+    });
+    Vue.filter('datetime', function (value, format) {
+        format = format || 'DD/MM/YYYY HH:mm:ss';
+        let m = moment(value);
+        return value ? (m.isValid() ? m.format(format) : value) : null;
+    });
+</script>
+
+@Html.Partial("~/Scripts/VueApp/Components/number.cshtml")
+@Html.Partial("~/Scripts/VueApp/Components/fileUpload.cshtml")
+@Html.Partial("~/Scripts/VueApp/Components/datepicker.cshtml")
+@Html.Partial("~/Scripts/VueApp/Components/modal.cshtml")
+@Html.Partial("~/Scripts/VueApp/Components/tabs.cshtml")
+@Html.Partial("~/Scripts/VueApp/Components/table-sticky.cshtml")
+@Html.Partial("~/Scripts/VueApp/Components/pagination.cshtml")
